@@ -1,0 +1,37 @@
+species,bin,mean,size,prediction_count,weight
+Abyssinian Nightjar,"(0.099, 0.2]",0.32558139534883723,43,3693,0.3625208599195053
+Abyssinian Nightjar,"(0.2, 0.3]",0.7272727272727273,11,1211,0.11887700009816432
+Abyssinian Nightjar,"(0.3, 0.4]",0.8,5,748,0.0734269166584863
+Abyssinian Nightjar,"(0.4, 0.5]",1.0,6,559,0.054873858839697656
+Abyssinian Nightjar,"(0.5, 0.6]",1.0,5,484,0.047511534308432316
+Abyssinian Nightjar,"(0.6, 0.7]",1.0,6,518,0.0508491214292726
+Abyssinian Nightjar,"(0.7, 0.8]",1.0,10,494,0.048493177579267695
+Abyssinian Nightjar,"(0.8, 0.9]",1.0,10,647,0.06351231962304899
+Abyssinian Nightjar,"(0.9, 1.0]",1.0,54,1833,0.17993521154412487
+African Black-headed Oriole,"(0.099, 0.2]",1.0,33,6344,0.3513902736235737
+African Black-headed Oriole,"(0.2, 0.3]",1.0,16,3253,0.18018167719065026
+African Black-headed Oriole,"(0.3, 0.4]",1.0,14,2131,0.11803478453528304
+African Black-headed Oriole,"(0.4, 0.5]",1.0,10,1611,0.08923230309072781
+African Black-headed Oriole,"(0.5, 0.6]",1.0,4,1339,0.0741663897197297
+African Black-headed Oriole,"(0.6, 0.7]",1.0,6,1091,0.060429821646172596
+African Black-headed Oriole,"(0.7, 0.8]",1.0,5,933,0.05167829843801928
+African Black-headed Oriole,"(0.8, 0.9]",1.0,26,750,0.04154204054503157
+African Black-headed Oriole,"(0.9, 1.0]",1.0,36,602,0.03334441121081201
+Red-billed Firefinch,"(0.099, 0.2]",0.05194805194805195,77,177,0.7531914893617021
+Red-billed Firefinch,"(0.2, 0.3]",0.07142857142857142,14,37,0.1574468085106383
+Red-billed Firefinch,"(0.3, 0.4]",0.0,6,11,0.04680851063829787
+Red-billed Firefinch,"(0.4, 0.5]",0.0,1,2,0.00851063829787234
+Red-billed Firefinch,"(0.5, 0.6]",0.0,2,4,0.01702127659574468
+Red-billed Firefinch,"(0.6, 0.7]",,0,1,0.00425531914893617
+Red-billed Firefinch,"(0.7, 0.8]",,0,2,0.00851063829787234
+Red-billed Firefinch,"(0.8, 0.9]",,0,0,0.0
+Red-billed Firefinch,"(0.9, 1.0]",1.0,1,1,0.00425531914893617
+Three-banded Plover,"(0.099, 0.2]",1.0,39,352,0.34679802955665023
+Three-banded Plover,"(0.2, 0.3]",0.9333333333333333,15,170,0.16748768472906403
+Three-banded Plover,"(0.3, 0.4]",1.0,7,110,0.10837438423645321
+Three-banded Plover,"(0.4, 0.5]",1.0,7,79,0.07783251231527094
+Three-banded Plover,"(0.5, 0.6]",1.0,8,65,0.06403940886699508
+Three-banded Plover,"(0.6, 0.7]",1.0,4,57,0.0561576354679803
+Three-banded Plover,"(0.7, 0.8]",1.0,6,57,0.0561576354679803
+Three-banded Plover,"(0.8, 0.9]",1.0,23,51,0.05024630541871921
+Three-banded Plover,"(0.9, 1.0]",1.0,41,74,0.0729064039408867

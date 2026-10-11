@@ -1,0 +1,5 @@
+species,evaluation_scope,cutoff,checked,correct,precision,one_sided_95_lower,use_for_labels
+Abyssinian Nightjar,at_fitted_cutoff,0.66663805816692,74,74,1.0,0.9603256161296866,True
+African Black-headed Oriole,all_checked_scores,,150,150,1.0,0.9802265618354915,False
+Red-billed Firefinch,at_fitted_cutoff,0.9983797726298821,0,0,,,False
+Three-banded Plover,at_fitted_cutoff,0.2588021085770054,100,99,0.99,0.9534401885464611,False

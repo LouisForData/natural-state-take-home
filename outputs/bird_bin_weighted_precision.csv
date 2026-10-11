@@ -1,0 +1,5 @@
+species,checked_sample_precision,covered_prediction_share,weighted_estimate_covered_bins,uncovered_prediction_share,missing_bin_scenario_low,missing_bin_scenario_high
+Abyssinian Nightjar,0.78,1.0,0.7084028041376782,0.0,0.7084028041376782,0.7084028041376782
+African Black-headed Oriole,1.0,1.0,1.0,0.0,1.0,1.0
+Red-billed Firefinch,0.0594059405940594,0.9872340425531915,0.05533475145544111,0.012765957446808529,0.05462835037303122,0.06739430781983968
+Three-banded Plover,0.9933333333333333,1.0,0.9888341543513957,0.0,0.9888341543513957,0.9888341543513957

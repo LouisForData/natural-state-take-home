@@ -1,0 +1,9 @@
+{
+  "prediction_rows": 29491,
+  "validation_rows": 551,
+  "policy_version": "takehome-policy-v2",
+  "observation_rows": 3147,
+  "plover_candidates": 538,
+  "plover_observations": 0,
+  "recall_available": false
+}

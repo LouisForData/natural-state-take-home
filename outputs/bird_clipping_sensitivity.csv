@@ -1,0 +1,13 @@
+species,eps,score_cutoff,fit_status
+Abyssinian Nightjar,0.0001,0.66663805816692,ok
+African Black-headed Oriole,0.0001,,not fitted: single outcome
+Red-billed Firefinch,0.0001,0.9983797726298821,ok
+Three-banded Plover,0.0001,0.2588021085770054,ok
+Abyssinian Nightjar,1e-06,0.6666380584485161,ok
+African Black-headed Oriole,1e-06,,not fitted: single outcome
+Red-billed Firefinch,1e-06,0.9983797726298821,ok
+Three-banded Plover,1e-06,0.2588021085770054,ok
+Abyssinian Nightjar,1e-08,0.6666380584485448,ok
+African Black-headed Oriole,1e-08,,not fitted: single outcome
+Red-billed Firefinch,1e-08,0.9983797726298821,ok
+Three-banded Plover,1e-08,0.2588021085770054,ok

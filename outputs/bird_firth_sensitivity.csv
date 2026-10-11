@@ -1,0 +1,5 @@
+species,firth_b0,firth_b1,firth_conf_threshold,firth_candidates,firth_converged,firth_fit_status,firth_iterations,firth_max_abs_modified_score,firth_threshold_status,target_p,used_for_observation_labels,glm_conf_threshold
+Abyssinian Nightjar,2.8963772190108577,1.9120974634734826,0.7085636847412148,2931,True,converged,14,2.3323434724459563e-09,sensitivity_only,0.99,False,0.66663805816692
+African Black-headed Oriole,5.054132317293119,-0.0571243884351065,,0,True,converged,18,9.805801514523038e-09,no_increasing_cutoff,0.99,False,
+Red-billed Firefinch,-1.4509924511184011,0.8700886864611508,0.9990411781783922,0,True,converged,16,4.574209677699059e-09,sensitivity_only,0.99,False,0.9983797726298821
+Three-banded Plover,4.268385914929089,0.21795956528385077,0.817433873287787,114,True,converged,16,1.980214967695071e-09,sensitivity_only,0.99,False,0.2588021085770054
