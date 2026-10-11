@@ -2,6 +2,8 @@
 
 **Live dashboard:** <https://louisfordata.github.io/natural-state-take-home/> (GitHub Pages, served from `outputs/dashboard/`)
 
+**Vegetation transect map:** <https://louisfordata.github.io/natural-state-take-home/outputs/transect_map.html> (interactive; needs internet for the basemap)
+
 Two explanatory notebooks turn BirdNET predictions into auditable labels and vegetation exports into traceable quality findings. The notebooks follow **question, reason, code, result and decision**. Reusable rules live in `src/`; written conclusions live in `reports/`.
 
 ## Start here
@@ -115,7 +117,7 @@ The full interactive `transect_map.html` uses external map tiles and JavaScript 
 - **Bird data:** 29,491 predictions and 551 expert checks. Nightjar's exploratory score cutoff is about 0.667 and produces 3,147 observations. Plover's fitted cutoff of about 0.259 gives 538 candidates, all withheld from final observations pending review. Oriole and Firefinch remain unconfirmed under this method.
 - A fitted 99% correctness target is not independent certification of 99% population precision. Recall cannot be measured from these data.
 - **Vegetation QA:** 32 submissions and 640 quadrats. Ecological summaries use 30 non-rejected submissions and 600 quadrats. There are 307 issue rows: one error, 271 warnings and 35 informational flags.
-- Stored calculation discrepancies, systematic transect orientation, unusual quadrat geometry and missing planned locations need review. Completing 20 quadrats establishes protocol effort, not ecological adequacy.
+- Stored calculation discrepancies, systematic transect orientation, unusual quadrat geometry and missing planned locations need review. Completing 20 quadrats establishes protocol effort, not ecological adequacy. Explore the transects, quadrats and review priorities on the [interactive transect map](https://louisfordata.github.io/natural-state-take-home/outputs/transect_map.html).
 
 ## Key output files
 
@@ -130,7 +132,7 @@ The full interactive `transect_map.html` uses external map tiles and JavaScript 
 | `vegetation_rule_catalogue.csv`, `vegetation_qa_parameters.json` | QA meanings, versions and tolerances |
 | `vegetation_spatial_rollup.csv`, `vegetation_project_patterns.csv` | Submission and project-level spatial review findings |
 | `veg_survey_summary.csv`, `veg_plot_summary.csv`, `veg_sampling_effort.csv` | Summary tables with explicit denominators |
-| `transect_map.html` | Interactive transect review map |
+| `transect_map.html` | Interactive transect review map ([open live](https://louisfordata.github.io/natural-state-take-home/outputs/transect_map.html)) |
 | `transects.geojson` | Spatial interchange file |
 | `figures/` | Static analysis and map figures |
 | `dashboard/` | Four-page results dashboard with embedded previews and download links |
