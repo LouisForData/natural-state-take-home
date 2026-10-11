@@ -56,4 +56,5 @@ The output preserves all prediction rows. A score outside the species' checked r
 
 Use the current Nightjar labels for the take-home's exploratory analysis with these limitations visible. Keep Plover pending review, retain Oriole and Firefinch as unconfirmed under the ordinary method, and request validation provenance and deployment metadata. A different estimator or production rule requires a documented decision and independent evaluation.
 
-**Evidence:** [threshold registry](../outputs/bird_thresholds.csv), [labels](../outputs/birdnet_predictions_labelled.csv), [cutoff evidence](../outputs/bird_checked_cutoff_evidence.csv), [bin weighting](../outputs/bird_bin_weighted_precision.csv), [Firth sensitivity](../outputs/bird_firth_sensitivity.csv), [notebook](../notebooks/01_bird_analysis.ipynb). Sources: supplied brief and Wood & Kahl paper in `data/reference/`.
+**Evidence:** [threshold registry](../outputs/bird_thresholds.csv), [labels](../outputs/birdnet_predictions_labelled.csv), [cutoff evidence](../outputs/bird_checked_cutoff_evidence.csv), [bin weighting](../outputs/bird_bin_weighted_precision.csv), [Firth sensitivity](../outputs/bird_firth_sensitivity.csv), [notebook](../notebooks/01_bird_analysis.ipynb). Sources: supplied brief and Wood & Kahl paper.
+
