@@ -1,0 +1,15 @@
+{
+  "all_submissions": 32,
+  "analysis_submissions": 30,
+  "actual_analysis_quadrats": 600,
+  "species_display_reconstruction_matches": 640,
+  "species_display_reconstruction_total": 640,
+  "error_flags": 1,
+  "warning_flags": 271,
+  "info_flags": 35,
+  "stored_calculation_discrepancies": 23,
+  "orientation_records": 30,
+  "orientation_median_bearing": 103.79405648677775,
+  "primary_surveyed": 29,
+  "primary_planned": 36
+}

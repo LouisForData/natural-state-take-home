@@ -1,0 +1,30 @@
+rule_id,severity,level,field,message,basis,rule_version
+S01,warning,survey,plot_name,More than one submission for this survey and plot; retain review status,analyst_review_heuristic,vegetation-qa-v2
+S02,warning,survey,review_state,Submission marked rejected in ODK review,structural_or_SOP_check,vegetation-qa-v2
+S03,error,survey,n_quadrats_declared,Quadrat count differs from SOP (20),structural_or_SOP_check,vegetation-qa-v2
+S04,warning,survey,duration_min,Survey duration outside 20-240 min,analyst_review_heuristic,vegetation-qa-v2
+S05,info,survey,start_time,Device time-zone offset is not EAT (+03:00); check device clock,analyst_review_heuristic,vegetation-qa-v2
+S06,error,survey,submitted_at,Submitted before survey end time,structural_or_SOP_check,vegetation-qa-v2
+S07,error,survey,vegplot_id,Survey on a plot not registered as viable,structural_or_SOP_check,vegetation-qa-v2
+S08,warning,survey,recorder_id,Recorder is not among the selected team members,structural_or_SOP_check,vegetation-qa-v2
+Q01,warning,quadrat,gps_accuracy_m,Quadrat GPS accuracy worse than 5 m,structural_or_SOP_check,vegetation-qa-v2
+Q03,error,quadrat,location,Quadrat has no GPS location,structural_or_SOP_check,vegetation-qa-v2
+SP01,warning,species,species_name,Species name has leading/trailing/double spaces,structural_or_SOP_check,vegetation-qa-v2
+SP02,info,species,species_name,Free-text name is close to a name on the species list; review (often a different species),analyst_review_heuristic,vegetation-qa-v2
+SP00,error,species,species_name,Species entry has no name,structural_or_SOP_check,vegetation-qa-v2
+SP03,warning,species,genus,Genus not on the species list but close to a listed genus (possible misspelling),analyst_review_heuristic,vegetation-qa-v2
+I01,error,quadrat,PARENT_KEY,Orphan quadrat parent,structural_or_SOP_check,vegetation-qa-v2
+I02,error,species,PARENT_KEY,Orphan additional-species parent,structural_or_SOP_check,vegetation-qa-v2
+I03,error,survey,vegplot_id,Unknown vegetation plot UUID,structural_or_SOP_check,vegetation-qa-v2
+I04,error,species,species_id,Selected species UUID not in list,structural_or_SOP_check,vegetation-qa-v2
+S09,error,survey,actual_quadrats,Actual repeat rows differ from required quadrat count,structural_or_SOP_check,vegetation-qa-v2
+S10,error,survey,quadrat_number,Quadrat numbers must be exactly 1 to 20,structural_or_SOP_check,vegetation-qa-v2
+SP05,warning,survey,quadrats_with_species_declared,Stored form calculation differs from recomputation from repeat records,structural_or_SOP_check,vegetation-qa-v2
+Q07,error,quadrat,location,Coordinates outside global valid range,structural_or_SOP_check,vegetation-qa-v2
+Q08,error,quadrat,herbs_present,Herb presence contradicts species list,structural_or_SOP_check,vegetation-qa-v2
+P01,warning,plot,length_m,Measured endpoint length outside analyst tolerance 45-55 m; review GPS,analyst_review_heuristic,vegetation-qa-v2
+P02,warning,plot,bearing_deg,Transect departs from north-south; confirm obstacle or hazard justification,analyst_review_heuristic,vegetation-qa-v2
+P03,warning,plot,midpoint_offset_m,Measured midpoint >25 m from planned centroid; review GPS uncertainty,structural_or_SOP_check,vegetation-qa-v2
+P04,error,plot,location,Viable transect missing endpoint or midpoint,structural_or_SOP_check,vegetation-qa-v2
+Q04,warning,quadrat,distance_to_transect_m,Quadrat outside transect belt plus quadrat accuracy and 5m endpoint allowance; review,analyst_review_heuristic,vegetation-qa-v2
+SP04,warning,species,macro_images-macro_1,New unknown morphospecies lacks a macro photo reference,structural_or_SOP_check,vegetation-qa-v2

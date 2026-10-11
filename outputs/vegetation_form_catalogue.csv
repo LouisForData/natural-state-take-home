@@ -1,0 +1,215 @@
+form,type,name,label,required,constraint,relevant,calculation
+herbaceous_veg_survey.xlsx,note,note_overview,"This form is to be used by field data teams to capture data according to the PVN **herbaceous vegetation** protocol.
+
+Refer to the appropriate Standard Operating Procedures to guide you through the data collection process.
+
+**Complete this form before leaving the plot** Refrain from using *Save as Draft* and select *Send* when you have finished collecting your data.
+
+** 💡 Tip** To remove a selection in ODK Collect, press and hold down on the question text to *Remove response*.",,,,
+herbaceous_veg_survey.xlsx,begin_group,field_team_specifics,Field Team Details,,,,
+herbaceous_veg_survey.xlsx,select_one transport.csv,selected_transport_type_uuid,Select the the mode of transport:,yes,,,
+herbaceous_veg_survey.xlsx,calculate,transport_type_label,,,,,"instance(""transport"")/root/item[name = ${selected_transport_type_uuid}]/label"
+herbaceous_veg_survey.xlsx,select_multiple_from_file project_team.csv,selected_project_team_uuid_multi,Select all the team members involved in this collection activity:,yes,,,
+herbaceous_veg_survey.xlsx,select_one_from_file project_team.csv,recorder_uuid,Who is recording the data:,yes,,${selected_project_team_uuid_multi} != '',
+herbaceous_veg_survey.xlsx,calculate,recorder_label,,,,,"instance(""project_team"")/root/item[name = ${recorder_uuid}]/label"
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,begin_group,survey_begin,Survey Details,,,,
+herbaceous_veg_survey.xlsx,start,start_time,Start time,yes,,,
+herbaceous_veg_survey.xlsx,calculate,survey_year,,,,,"format-date(${start_time}, '%Y')"
+herbaceous_veg_survey.xlsx,select_one_from_file surveys.csv,selected_survey_uuid,Select a Survey:,yes,,,
+herbaceous_veg_survey.xlsx,calculate,get_survey_label,,,,,"instance('surveys')/root/item[selected(${selected_survey_uuid}, name)]/label"
+herbaceous_veg_survey.xlsx,calculate,project_label,,,,,"instance(""surveys"")/root/item[name = ${selected_survey_uuid}]/project_label"
+herbaceous_veg_survey.xlsx,calculate,project_abbr,,,,,"instance(""surveys"")/root/item[name = ${selected_survey_uuid}]/project_abbr"
+herbaceous_veg_survey.xlsx,calculate,area_label,,,,,"instance(""surveys"")/root/item[name = ${selected_survey_uuid}]/area_label"
+herbaceous_veg_survey.xlsx,calculate,baseline_year,,,,,"instance(""surveys"")/root/item[name = ${selected_survey_uuid}]/baseline_year"
+herbaceous_veg_survey.xlsx,calculate,replicate_index,,,,,${survey_year} - ${baseline_year}
+herbaceous_veg_survey.xlsx,calculate,replicate,,,,,"if(
+  ${replicate_index} != '' and ${area_label} != '', 
+  if(
+    ${replicate_index} = 0, 
+    concat(${area_label}, '_baseline'), 
+    concat(${area_label}, '_yr', ${replicate_index})
+  ), 
+  ''
+)"
+herbaceous_veg_survey.xlsx,calculate,survey_type,,,,,"instance(""surveys"")/root/item[name=${selected_survey_uuid}]/survey_type_label"
+herbaceous_veg_survey.xlsx,calculate,target_group,,,,,"instance(""surveys"")/root/item[name=${selected_survey_uuid}]/target_group"
+herbaceous_veg_survey.xlsx,note,note_parent_labels,"Project Name: **${project_label}**
+Project Area: **${area_label}**
+Survey Type: **${survey_type}**
+Target Group: **${target_group}**
+Replicate: **${replicate}**",,,${replicate} != '',
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,begin_group,plot_selection,Selected Plot,,,,
+herbaceous_veg_survey.xlsx,select_one_from_file vegplots.csv,selected_plot_uuid,Select the **Vegetation Plot**. This is the transect registered in the field:,yes,,${selected_survey_uuid} != '',
+herbaceous_veg_survey.xlsx,calculate,plot_name,,,,,instance('vegplots')/root/item[name = ${selected_plot_uuid}]/label
+herbaceous_veg_survey.xlsx,calculate,get_plot_status,,,,,instance('vegplots')/root/item[name = ${selected_plot_uuid}]/plot_status
+herbaceous_veg_survey.xlsx,note,plot_status,Plot Status: **${get_plot_status}**,,,${plot_name} != '',
+herbaceous_veg_survey.xlsx,note,quadrat_note,You are now ready to begin collecting quadrat observations. Note that **20 quadrats** are required to submit the form.,,,${plot_name} != '',
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,begin_group,observations,Observations,,,${selected_plot_uuid} != '',
+herbaceous_veg_survey.xlsx,begin_repeat,quadrat_repeat,Quadrat,,,,
+herbaceous_veg_survey.xlsx,calculate,quadrat_number,Quadrat Number,,,,position(..)
+herbaceous_veg_survey.xlsx,note,note_new_quadrat,Move to **Quadrat ${quadrat_number}**,,,,
+herbaceous_veg_survey.xlsx,select_one yes_no,herbs_present,Are there any herbaceous species present?,yes,,,
+herbaceous_veg_survey.xlsx,begin_group,herb_species,Herb Species,,,${herbs_present} = 'yes',
+herbaceous_veg_survey.xlsx,select_one yes_no,all_unknown_unidentifiable,Are **ALL** of the specimens either unidentifiable or missing from the list below?,yes,,,
+herbaceous_veg_survey.xlsx,select_multiple species.csv,selected_herb_species_uuids,Select **ALL** of the species present:,${all_unknown_unidentifiable} = 'no',. = '' or ${all_unknown_unidentifiable} = 'no',${all_unknown_unidentifiable} != 'yes',
+herbaceous_veg_survey.xlsx,calculate,count_herb_species,,,,,count-selected(${selected_herb_species_uuids})
+herbaceous_veg_survey.xlsx,note,note_herb_species_count,"**${count_herb_species}** species selected
+",,,${all_unknown_unidentifiable} != 'yes',
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,select_one yes_no,additional_species_present,"Are there any species present in the quadrat that are not included in the provided species list, or that you cannot identify?",yes,. = 'yes' or ${all_unknown_unidentifiable} != 'yes',${herbs_present} = 'yes' and ${all_unknown_unidentifiable} != '',
+herbaceous_veg_survey.xlsx,begin_repeat,additional_species_repeat,Additional Species,,,${additional_species_present} = 'yes',
+herbaceous_veg_survey.xlsx,calculate,observation_index,,,,,position(..)
+herbaceous_veg_survey.xlsx,select_one species_entry_mode,species_entry_mode,How do you want to record this species?,yes,,,
+herbaceous_veg_survey.xlsx,calculate,count_prior_new_in_submission,,,,${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing',count(/data/observations/quadrat_repeat[quadrat_number < current()/../../quadrat_number]/additional_species_repeat[species_entry_mode = 'new_unknown' or species_entry_mode = 'new_missing']) + count(../../additional_species_repeat[position() < position(current()/..)][species_entry_mode = 'new_unknown' or species_entry_mode = 'new_missing'])
+herbaceous_veg_survey.xlsx,calculate,target_extra_name,,,,${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing',instance('species_extra')/root/item[choice_status='inactive' and group_type='herb'][position() = (number(${count_prior_new_in_submission}) + 1)]/name
+herbaceous_veg_survey.xlsx,calculate,assigned_unknown_index,,,,${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing',int(${base_active_herb_count}) + int(${count_prior_new_in_submission}) + 1
+herbaceous_veg_survey.xlsx,calculate,auto_new_unknown_label,,,,${species_entry_mode} = 'new_unknown',instance('species_extra')/root/item[name = ${target_extra_name}]/label
+herbaceous_veg_survey.xlsx,note,note_new_unknown,"New Record: **${auto_new_unknown_label}**
+
+This is the entity name. Use it consistently in all plots for the same specimen.",,,${species_entry_mode} = 'new_unknown',
+herbaceous_veg_survey.xlsx,select_one_from_file species_extra.csv,select_reuse_unknown,Select the **unknown** to reuse,,,${species_entry_mode} = 'reuse_unknown',
+herbaceous_veg_survey.xlsx,calculate,reused_unknown_label,,,,${species_entry_mode} = 'reuse_unknown',instance('species_extra')/root/item[name = ${select_reuse_unknown}]/label
+herbaceous_veg_survey.xlsx,note,note_reuse_unknown,Linked to **${reused_unknown_label}**,,,${species_entry_mode} = 'reuse_unknown' and ${select_reuse_unknown} != '',
+herbaceous_veg_survey.xlsx,calculate,auto_new_missing_label,,,,${species_entry_mode} = 'new_missing',instance('species_extra')/root/item[name = ${target_extra_name}]/label
+herbaceous_veg_survey.xlsx,text,new_missing_canonical,Input the **canonical species name** not included in the herbaceous species list:,yes,"not(regex(., '[,;()]'))",${species_entry_mode} = 'new_missing',
+herbaceous_veg_survey.xlsx,note,note_new_missing,"**Important**
+
+You recorded **${new_missing_canonical}** as a new missing species. It has been assigned the entity ID **${auto_new_missing_label}**.
+
+If you encounter this species again in another quadrat in **THIS PLOT** (**during this submission**), you will see it listed as **${auto_new_missing_label}** in the reuse picker — *not* by its canonical name. 
+
+The canonical name is saved and will appear **future plots** after submission of this form.",,,${species_entry_mode} = 'new_missing' and ${new_missing_canonical} != '',
+herbaceous_veg_survey.xlsx,select_one_from_file species_extra.csv,select_reuse_missing,Select the **missing species** to reuse,,,${species_entry_mode} = 'reuse_missing',
+herbaceous_veg_survey.xlsx,calculate,reused_missing_label,,,,${species_entry_mode} = 'reuse_missing',"if(/data/observations/quadrat_repeat/additional_species_repeat[target_extra_name = ${select_reuse_missing} and species_entry_mode = 'new_missing']/new_missing_canonical != '', concat(instance('species_extra')/root/item[name = ${select_reuse_missing}]/label, ' (', /data/observations/quadrat_repeat/additional_species_repeat[target_extra_name = ${select_reuse_missing} and species_entry_mode = 'new_missing']/new_missing_canonical, ')'), instance('species_extra')/root/item[name = ${select_reuse_missing}]/label)"
+herbaceous_veg_survey.xlsx,note,note_reuse_missing,Linked to **${reused_missing_label}**,,,${species_entry_mode} = 'reuse_missing' and ${select_reuse_missing} != '',
+herbaceous_veg_survey.xlsx,calculate,validated_name,,,,,"if(${species_entry_mode} = 'new_unknown', ${auto_new_unknown_label}, if(${species_entry_mode} = 'reuse_unknown', ${reused_unknown_label}, if(${species_entry_mode} = 'new_missing', concat(${auto_new_missing_label}, ' (', ${new_missing_canonical}, ')'), ${reused_missing_label})))"
+herbaceous_veg_survey.xlsx,calculate,entity_label_to_write,,,,${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing',"if(${species_entry_mode} = 'new_missing', ${new_missing_canonical}, instance('species_extra')/root/item[name = ${target_extra_name}]/label)"
+herbaceous_veg_survey.xlsx,calculate,review_status,,,,,"if(${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing', 'pending', '')"
+herbaceous_veg_survey.xlsx,calculate,new_record_reason,,,,,"if(${species_entry_mode} = 'new_unknown', 'unknown_species', if(${species_entry_mode} = 'new_missing', 'missing_species', ''))"
+herbaceous_veg_survey.xlsx,calculate,write_choice_status,,,,${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing','active'
+herbaceous_veg_survey.xlsx,begin_group,macro_images,Close-up Images,,,${species_entry_mode} = 'new_unknown' or ${species_entry_mode} = 'new_missing',
+herbaceous_veg_survey.xlsx,note,note_images,"Take at least one close-up photograph of the herbaceous plant to capture the leaf arrangement, flowers, seeds, etc. Highly recommended for all species without an existing high-performing classifier and required if marked as **unknown**.",,,,
+herbaceous_veg_survey.xlsx,image,macro_1,Image 1,${species_entry_mode} = 'new_unknown' ,,,
+herbaceous_veg_survey.xlsx,image,macro_2,Image 2,,,${macro_1} != '',
+herbaceous_veg_survey.xlsx,image,macro_3,Image 3,,,${macro_2} != '',
+herbaceous_veg_survey.xlsx,image,macro_4,Image 4,,,${macro_3} != '',
+herbaceous_veg_survey.xlsx,image,macro_5,Image 5,,,${macro_4} != '',
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,end_repeat,,,,,,
+herbaceous_veg_survey.xlsx,begin_group,species_list,List,,,,
+herbaceous_veg_survey.xlsx,calculate,known_species_list,,,,,"if(${selected_herb_species_uuids} != '', join('<br/>', instance('species')/root/item[selected(${selected_herb_species_uuids}, name)]/label), '')"
+herbaceous_veg_survey.xlsx,calculate,additional_species_list,,,,,"join('<br/>', ${validated_name}[. != ''])"
+herbaceous_veg_survey.xlsx,calculate,all_species_list,,,,,"if(${known_species_list} != '' and ${additional_species_list} != '', concat(${known_species_list}, '<br/>', ${additional_species_list}), coalesce(${known_species_list}, ${additional_species_list}))"
+herbaceous_veg_survey.xlsx,note,note_species_summary_heading,"### Quadrat ${quadrat_number} — Species recorded:
+",,,${herbs_present} = 'yes',
+herbaceous_veg_survey.xlsx,note,note_species_list,"**Known:**<br>${known_species_list}
+**Additional:**<br>${additional_species_list}",,,${herbs_present} = 'yes',
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,image,quadrat_image,"Take a photograph of the quadrat from above, including the entire quadrat in the field of view of the camera.",yes,,,
+herbaceous_veg_survey.xlsx,geopoint,location_quadrat,Record current location standing over the quadrat,yes,,${quadrat_image} != '',
+herbaceous_veg_survey.xlsx,text,quadrat_comment,Add any details that should be noted about this specific quadrat in order to properly interpret the data?,,,${location_quadrat} != '',
+herbaceous_veg_survey.xlsx,end_repeat,,,,,,
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+herbaceous_veg_survey.xlsx,calculate,base_active_herb_count,,,,,count(instance('species_extra')/root/item[choice_status = 'active' and group_type = 'herb'])
+herbaceous_veg_survey.xlsx,calculate,new_unknown_index_list,,,,,"join('|', /data/observations/quadrat_repeat/additional_species_repeat[species_entry_mode = 'new_unknown']/assigned_unknown_index)"
+herbaceous_veg_survey.xlsx,calculate,new_missing_index_list,,,,,"join('|', /data/observations/quadrat_repeat/additional_species_repeat[species_entry_mode = 'new_missing']/assigned_unknown_index)"
+herbaceous_veg_survey.xlsx,,,,,,,
+herbaceous_veg_survey.xlsx,begin_group,survey_end,Finalise Submission,,,,
+herbaceous_veg_survey.xlsx,calculate,quadrats_with_species,,,,,count(/data/observations/quadrat_repeat[selected_herb_species_uuids != '' or count(additional_species_repeat/validated_name[. != '']) > 0])
+herbaceous_veg_survey.xlsx,note,quadrat_check_heading,## Activity Summary,,,,
+herbaceous_veg_survey.xlsx,note,quadrat_check,Of 20 quadrats: ${quadrats_with_species} had species recorded.,,,,
+herbaceous_veg_survey.xlsx,background-geopoint,background_geopoint,,,,,
+herbaceous_veg_survey.xlsx,note,note_field_submission,"To avoid data loss and mistakes, **Send your completed form now**. When an internet connection is available, sync to ODK Central.",,,,
+herbaceous_veg_survey.xlsx,select_one yes_no,confirm_submission,Are you **sure** that the data entered is complete and correct?,yes,.='yes',,
+herbaceous_veg_survey.xlsx,text,herbaceous_veg_notes,Provide any relevant details not captured above:,,,,
+herbaceous_veg_survey.xlsx,end,end_time,End time,yes,,,
+herbaceous_veg_survey.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,note,note_overview,"This form is to be used by field data teams to **establish vegetation plots** that will be sampled according to the PVN herbaceous vegetation and/or woody vegetation protocol.
+
+Refer to the appropriate Standard Operating Procedures to guide you through the data collection process.
+
+**Complete this form before leaving the plot.** Refrain from using *Save as Draft* and select *Send* when you have finished collecting your data.",,,,
+register_vegetation_plots.xlsx,begin_group,field_team_specifics,Field Team Details,,,,
+register_vegetation_plots.xlsx,select_one transport.csv,selected_transport_type_uuid,Select the the mode of transport:,yes,,,
+register_vegetation_plots.xlsx,calculate,transport_type_label,,,,,"instance(""transport"")/root/item[name = ${selected_transport_type_uuid}]/label"
+register_vegetation_plots.xlsx,select_multiple_from_file project_team.csv,selected_project_team_uuid_multi,Select all the team members involved in this collection activity:,yes,,,
+register_vegetation_plots.xlsx,select_one_from_file project_team.csv,recorder_uuid,Who is recording the data:,yes,,${selected_project_team_uuid_multi} != '',
+register_vegetation_plots.xlsx,calculate,recorder_label,,,,,"instance(""project_team"")/root/item[name = ${recorder_uuid}]/label"
+register_vegetation_plots.xlsx,calculate,default_survey_uuids,,,,,"join(' ', instance('surveys')/root/item[target_parent_taxon = 'plants']/name)"
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,,,,,,,
+register_vegetation_plots.xlsx,begin_group,survey_begin,Survey Details,,,,
+register_vegetation_plots.xlsx,start,start_time,Start time,yes,,,
+register_vegetation_plots.xlsx,calculate,survey_year,,,,,"format-date(${start_time}, '%Y')"
+register_vegetation_plots.xlsx,select_multiple_from_file surveys.csv,selected_survey_uuid_multi,Select the vegetation survey(s) that will occur in this plot:,yes,,,"join(' ', instance('surveys')/root/item[target_parent_taxon = 'plants']/name)"
+register_vegetation_plots.xlsx,calculate,get_survey_label_multi,,,,,"join(' ', instance('surveys')/root/item[selected(${selected_survey_uuid_multi}, name)]/label)"
+register_vegetation_plots.xlsx,calculate,project_label,,,,,"instance(""surveys"")/root/item[name = selected-at(${selected_survey_uuid_multi}, 0)]/project_label"
+register_vegetation_plots.xlsx,calculate,project_abbr,,,,,"instance(""surveys"")/root/item[name = selected-at(${selected_survey_uuid_multi}, 0)]/project_abbr"
+register_vegetation_plots.xlsx,calculate,area_label,,,,,"instance(""surveys"")/root/item[name = selected-at(${selected_survey_uuid_multi}, 0)]/area_label"
+register_vegetation_plots.xlsx,calculate,baseline_year,,,,,"instance(""surveys"")/root/item[name = selected-at(${selected_survey_uuid_multi}, 0)]/baseline_year"
+register_vegetation_plots.xlsx,calculate,replicate_index,,,,,"if(${selected_survey_uuid_multi} = '', '', number(${survey_year}) - number(${baseline_year}))"
+register_vegetation_plots.xlsx,calculate,replicate,,,,,"if(${selected_survey_uuid_multi} = '', '',
+  if(number(${replicate_index}) = 0,
+    concat(${area_label}, '_baseline'),
+    concat(${area_label}, '_yr', string(${replicate_index}))
+  )
+)"
+register_vegetation_plots.xlsx,note,note_parent_labels,"Project Name: **${project_label}**
+Area: **${area_label}**
+Replicate: **${replicate}**
+",,,${replicate} != '',
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,begin_group,plot_selection,Selected Plot,,,,
+register_vegetation_plots.xlsx,select_one_from_file centroids.csv,selected_plot_uuid,Select the **Vegetation Plot** represented by a centroid point,yes,,,
+register_vegetation_plots.xlsx,calculate,plot_label,,,,,instance('centroids')/root/item[name = ${selected_plot_uuid}]/label
+register_vegetation_plots.xlsx,calculate,plot_name,,,,,instance('centroids')/root/item[name = ${selected_plot_uuid}]/choice_name
+register_vegetation_plots.xlsx,calculate,geohash,,,,,instance('centroids')/root/item[name = ${selected_plot_uuid}]/geohash
+register_vegetation_plots.xlsx,calculate,stratum_label,,,,,instance('centroids')/root/item[name = ${selected_plot_uuid}]/stratum_label
+register_vegetation_plots.xlsx,calculate,sample_status,,,,,instance('centroids')/root/item[name = ${selected_plot_uuid}]/sample_status
+register_vegetation_plots.xlsx,select_one yes_no,is_plot_viable,Is this plot viable?,yes,,,
+register_vegetation_plots.xlsx,text,plot_establishment_notes,Explain why you are discarding this plot,yes,,${is_plot_viable} = 'no',
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,begin_group,plot_metadata,Plot Details,"if(${is_plot_viable} = 'yes', 'yes', '')",,${is_plot_viable} = 'yes',
+register_vegetation_plots.xlsx,select_one_from_file ecosystem_types.csv,selected_ecosystem_type_uuid,What ecosystem type is this plot located in:,yes,,,
+register_vegetation_plots.xlsx,calculate,ecosystem_type_name,,,,,instance('ecosystem_types')/root/item[name = ${selected_ecosystem_type_uuid}]/label
+register_vegetation_plots.xlsx,select_one yes_no,woody_species_present,Are there woody species present?,yes,,,
+register_vegetation_plots.xlsx,select_one yes_no,known_dominant_woody_species_present,Are any of these dominant woody species present in the woody species list?,yes,,${woody_species_present} = 'yes',
+register_vegetation_plots.xlsx,select_multiple species.csv,known_dominant_woody_species,What dominant woody species are present?,${known_dominant_woody_species_present} = 'yes',,${known_dominant_woody_species_present} != 'no',
+register_vegetation_plots.xlsx,select_one yes_no,unknown_dominant_woody_species_present,Are any of these dominant woody species not present in the woody species list?,yes,,${woody_species_present} = 'yes',
+register_vegetation_plots.xlsx,text,unknown_dominant_woody_species,Type the names of the dominant woody species not present in the species list as Genus species. Separate multiple species with commas. ,yes,,${unknown_dominant_woody_species_present} = 'yes',
+register_vegetation_plots.xlsx,text,canopy_height_m,"What is the approximate canopy height, to the nearest metre?",yes,"regex(., '^[0-9]+$') and number(.) <= 50",${woody_species_present} = 'yes',
+register_vegetation_plots.xlsx,select_one canopy_structure,canopy_structure,Is the canopy structure: ,yes,,${woody_species_present} = 'yes',
+register_vegetation_plots.xlsx,select_one soil_type,soil_type,Briefly describe the soil type:,yes,,,
+register_vegetation_plots.xlsx,select_multiple ground_cover,ground_cover,Briefly describe the ground cover:,yes,,,
+register_vegetation_plots.xlsx,select_one yes_no,water_present,Is there a water source nearby?,yes,,,
+register_vegetation_plots.xlsx,select_multiple disturbance_type,disturbance_types,Are there any signs of disturbance that occurred within the last year?,yes,"not(selected(., 'none') and count-selected(.) > 1)",,
+register_vegetation_plots.xlsx,begin_group,collect_points,Transect Documentation,,,,
+register_vegetation_plots.xlsx,note,transect_orientation_note,,,,,
+register_vegetation_plots.xlsx,begin_group,endpoint_a,Endpoint A,,,,
+register_vegetation_plots.xlsx,image,image_endpoint_a,**Stand at endpoint A** and take a photo **facing toward endpoint B**.,yes,,,
+register_vegetation_plots.xlsx,geopoint,location_endpoint_a,Record your current location **at endpoint A**.,yes,,,
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,begin_group,midpoint,Midpoint,,,,
+register_vegetation_plots.xlsx,image,image_midpoint_toward_a,**Move to the midpoint.** Take a photo **facing toward endpoint A**.,yes,,,
+register_vegetation_plots.xlsx,image,image_midpoint_toward_b,"**Standing at the midpoint**, take a photo **facing toward endpoint B**.",yes,,,
+register_vegetation_plots.xlsx,geopoint,location_midpoint,Record your current location **at the midpoint**.,yes,,,
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,begin_group,endpoint_b,Endpoint B,,,,
+register_vegetation_plots.xlsx,image,image_endpoint_b,**Move to endpoint B.** Take a photo **facing toward endpoint A**.,yes,,,
+register_vegetation_plots.xlsx,geopoint,location_endpoint_b,Record your current location **at endpoint B**.,yes,,,
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,calculate,vegplot_transect,,,,,"concat(${location_endpoint_a}, ""; "", ${location_midpoint}, ""; "", ${location_endpoint_b})"
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,end_group,,,,,,
+register_vegetation_plots.xlsx,begin_group,survey_end,Finalise Submission,,,,
+register_vegetation_plots.xlsx,calculate,update_vegplot_link,,,,,"""yes"""
+register_vegetation_plots.xlsx,calculate,update_marker_color,,,,,"""#c8cbcc"""
+register_vegetation_plots.xlsx,select_one yes_no,confirm_submission,Are you **sure** that the data entered is complete and correct?,yes,.='yes',,
+register_vegetation_plots.xlsx,background-geopoint,background_geopoint,,,,,
+register_vegetation_plots.xlsx,note,note_field_submission,"To avoid data loss and mistakes, **Send your completed form now**. When an internet connection is available, sync to ODK Central.",,,,
+register_vegetation_plots.xlsx,text,plot_establishment_notes,Provide any relevant details not captured above:,,,,
+register_vegetation_plots.xlsx,end,end_time,End time,yes,,,
+register_vegetation_plots.xlsx,end_group,,,,,,

@@ -1,0 +1,19 @@
+,value
+project,Savanna Monitoring Pilot
+area,LW
+all_submissions,32
+analysis_submissions,30
+rejected_submissions,2
+primary_planned_locations,36
+registered_viable,30
+registered_nonviable,1
+all_surveyed_plots,30
+analysis_plots,30
+all_quadrat_rows,640
+analysis_quadrat_rows,600
+analysis_quadrats_with_herbs,593
+as_entered_named_taxa_including_unknowns,153
+unknown_labels_within_analysis,60
+flags_errors,1
+flags_warnings,271
+flags_info,35

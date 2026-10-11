@@ -1,0 +1,4 @@
+finding,affected_records,denominator,severity,interpretation
+Orientation departs from north-south,30,30,warning,Systematic deviation; confirm field layout or capture issue.
+Device offset differs from expected EAT,32,32,info,Offset alone does not prove an incorrect clock.
+Stored calculation differs from repeat reconstruction,23,32,warning,"Cause may be calculation, form version, editing, or export; unresolved."

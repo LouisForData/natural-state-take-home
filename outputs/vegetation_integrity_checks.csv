@@ -1,0 +1,14 @@
+,problem_rows,ok
+submission KEY not unique,0,True
+quadrat with no parent submission,0,True
+species row with no parent quadrat,0,True
+submissions without exactly 20 quadrats,0,True
+submissions with quadrat numbers != 1..20,0,True
+survey plot not in vegplots,0,True
+vegplot not linked to a centroid,0,True
+registration not linked to a centroid,0,True
+survey id not in surveys,0,True
+recorder not in project_team,0,True
+recorder not among selected team,0,True
+known species uuid not in species list,0,True
+reused unknown/missing uuid not in species_extra,0,True

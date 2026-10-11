@@ -1,0 +1,785 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4809857,
+            0.2196114
+          ],
+          [
+            37.4812757,
+            0.2195439
+          ],
+          [
+            37.4815011,
+            0.219517
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_16",
+        "is_viable": "yes",
+        "length_m": 58.26281189025597,
+        "midpoint_offset_m": 3.5096674215247505
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4663654,
+            0.2223891
+          ],
+          [
+            37.4665469,
+            0.2222239
+          ],
+          [
+            37.4667289,
+            0.2222717
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_11",
+        "is_viable": "yes",
+        "length_m": 42.47486394749734,
+        "midpoint_offset_m": 11.58085910909029
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4604633,
+            0.2267204
+          ],
+          [
+            37.4607366,
+            0.2267015
+          ],
+          [
+            37.4610004,
+            0.226577
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_29",
+        "is_viable": "yes",
+        "length_m": 61.81432444773544,
+        "midpoint_offset_m": 8.313332235481077
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4566835,
+            0.2255781
+          ],
+          [
+            37.4568475,
+            0.2256014
+          ],
+          [
+            37.4570827,
+            0.2255237
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_21",
+        "is_viable": "yes",
+        "length_m": 44.79893461255113,
+        "midpoint_offset_m": 13.790228744075526
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4389493,
+            0.2226309
+          ],
+          [
+            37.4391505,
+            0.2225301
+          ],
+          [
+            37.4393258,
+            0.2224661
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_18",
+        "is_viable": "yes",
+        "length_m": 45.69951201825183,
+        "midpoint_offset_m": 2.5882530461698168
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4370378,
+            0.2190527
+          ],
+          [
+            37.4372432,
+            0.2190427
+          ],
+          [
+            37.4374202,
+            0.2190106
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_25",
+        "is_viable": "yes",
+        "length_m": 42.77754716510132,
+        "midpoint_offset_m": 2.630786625786518
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4356901,
+            0.2256274
+          ],
+          [
+            37.4359,
+            0.2255211
+          ],
+          [
+            37.4361431,
+            0.2254666
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_04",
+        "is_viable": "yes",
+        "length_m": 53.45024116537892,
+        "midpoint_offset_m": 5.702818067969439
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4291504,
+            0.2315464
+          ],
+          [
+            37.4294428,
+            0.231629
+          ],
+          [
+            37.4296194,
+            0.2315847
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_07",
+        "is_viable": "yes",
+        "length_m": 52.32359916697284,
+        "midpoint_offset_m": 5.94344637204995
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4258433,
+            0.2347411
+          ],
+          [
+            37.426248,
+            0.2348451
+          ],
+          [
+            37.4263836,
+            0.2346862
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_15",
+        "is_viable": "yes",
+        "length_m": 60.38746585571825,
+        "midpoint_offset_m": 15.153954243012013
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4228681,
+            0.2349019
+          ],
+          [
+            37.4230384,
+            0.2348023
+          ],
+          [
+            37.4232599,
+            0.2347975
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_20",
+        "is_viable": "yes",
+        "length_m": 45.08594638576749,
+        "midpoint_offset_m": 4.591666061047784
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4107934,
+            0.2333662
+          ],
+          [
+            37.4110213,
+            0.23341
+          ],
+          [
+            37.411248,
+            0.2333418
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_24",
+        "is_viable": "yes",
+        "length_m": 50.62155501903448,
+        "midpoint_offset_m": 6.159206893566034
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4062615,
+            0.2341719
+          ],
+          [
+            37.4064279,
+            0.2339957
+          ],
+          [
+            37.406734,
+            0.2340657
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_02",
+        "is_viable": "yes",
+        "length_m": 53.84992038248448,
+        "midpoint_offset_m": 13.291072400752753
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4031872,
+            0.2342437
+          ],
+          [
+            37.4033147,
+            0.234192
+          ],
+          [
+            37.4035069,
+            0.2340745
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_28",
+        "is_viable": "yes",
+        "length_m": 40.2204550679013,
+        "midpoint_offset_m": 1.20095668492831
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4000094,
+            0.2315323
+          ],
+          [
+            37.4002465,
+            0.231357
+          ],
+          [
+            37.4004407,
+            0.2311615
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_01",
+        "is_viable": "yes",
+        "length_m": 63.245314391890595,
+        "midpoint_offset_m": 11.411021070635405
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.3965471,
+            0.2340935
+          ],
+          [
+            37.3968651,
+            0.2342553
+          ],
+          [
+            37.3970411,
+            0.2341948
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_13",
+        "is_viable": "yes",
+        "length_m": 56.07285900410358,
+        "midpoint_offset_m": 13.973023674273552
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.3826638,
+            0.232485
+          ],
+          [
+            37.3828088,
+            0.2325834
+          ],
+          [
+            37.3831058,
+            0.2325479
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_17",
+        "is_viable": "yes",
+        "length_m": 49.64292395532431,
+        "midpoint_offset_m": 23.854355109897018
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.3693426,
+            0.2317032
+          ],
+          [
+            37.3695558,
+            0.2316303
+          ],
+          [
+            37.3697609,
+            0.2315821
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_06",
+        "is_viable": "yes",
+        "length_m": 48.42245292769917,
+        "midpoint_offset_m": 4.307825463271281
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4965356,
+            0.2693565
+          ],
+          [
+            37.4967388,
+            0.269311
+          ],
+          [
+            37.4969466,
+            0.2692712
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_46",
+        "is_viable": "yes",
+        "length_m": 46.67450694589273,
+        "midpoint_offset_m": 6.213038380227189
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4938742,
+            0.2191195
+          ],
+          [
+            37.4939803,
+            0.2192015
+          ],
+          [
+            37.4940507,
+            0.2192211
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_19",
+        "is_viable": "yes",
+        "length_m": 22.64512845992208,
+        "midpoint_offset_m": 3.625172228260008
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4911897,
+            0.2174675
+          ],
+          [
+            37.4913878,
+            0.2176415
+          ],
+          [
+            37.4914037,
+            0.2176097
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_27",
+        "is_viable": "yes",
+        "length_m": 28.56999519553742,
+        "midpoint_offset_m": 20.30374042294972
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4880496,
+            0.2176529
+          ],
+          [
+            37.4882202,
+            0.217605
+          ],
+          [
+            37.4884683,
+            0.2174781
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_26",
+        "is_viable": "yes",
+        "length_m": 50.45140669944034,
+        "midpoint_offset_m": 7.711785238970174
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4889037,
+            0.2730224
+          ],
+          [
+            37.4891393,
+            0.2729597
+          ],
+          [
+            37.4892734,
+            0.2728371
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_05",
+        "is_viable": "yes",
+        "length_m": 45.98297818139277,
+        "midpoint_offset_m": 19.984890172781924
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4884265,
+            0.2423013
+          ],
+          [
+            37.488653,
+            0.2423874
+          ],
+          [
+            37.4888286,
+            0.2423873
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_09",
+        "is_viable": "yes",
+        "length_m": 45.72228262776931,
+        "midpoint_offset_m": 5.348567607401325
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.502578,
+            0.2208824
+          ],
+          [
+            37.5026736,
+            0.2208665
+          ],
+          [
+            37.5029741,
+            0.2208774
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_14",
+        "is_viable": "yes",
+        "length_m": 44.04749210007544,
+        "midpoint_offset_m": 33.56293315864938
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4988451,
+            0.2197688
+          ],
+          [
+            37.4990876,
+            0.219717
+          ],
+          [
+            37.4993334,
+            0.219599
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_10",
+        "is_viable": "yes",
+        "length_m": 57.485241766625215,
+        "midpoint_offset_m": 10.157993171558598
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4962888,
+            0.2209465
+          ],
+          [
+            37.4966092,
+            0.2207736
+          ],
+          [
+            37.4967193,
+            0.2207899
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_30",
+        "is_viable": "yes",
+        "length_m": 50.93784319408017,
+        "midpoint_offset_m": 14.528194174378847
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4758562,
+            0.2221944
+          ],
+          [
+            37.4761667,
+            0.2220752
+          ],
+          [
+            37.4763507,
+            0.222044
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_03",
+        "is_viable": "yes",
+        "length_m": 57.47247605751862,
+        "midpoint_offset_m": 5.308951329227284
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.4733524,
+            0.2231202
+          ],
+          [
+            37.4735576,
+            0.2231524
+          ],
+          [
+            37.4738019,
+            0.223502
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_22",
+        "is_viable": "yes",
+        "length_m": 65.57846729727558,
+        "midpoint_offset_m": 17.791313355084082
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.3732217,
+            0.2298601
+          ],
+          [
+            37.3733041,
+            0.2297991
+          ],
+          [
+            37.3735386,
+            0.2296556
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_12",
+        "is_viable": "yes",
+        "length_m": 41.93747948983863,
+        "midpoint_offset_m": 12.150023039776505
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            37.3591777,
+            0.2278005
+          ],
+          [
+            37.3593798,
+            0.2277962
+          ],
+          [
+            37.3595746,
+            0.2276407
+          ]
+        ]
+      },
+      "properties": {
+        "plot_name": "SavMon_LW_Plot_08",
+        "is_viable": "yes",
+        "length_m": 47.57572903308718,
+        "midpoint_offset_m": 5.6501111335223895
+      }
+    }
+  ]
+}

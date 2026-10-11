@@ -1,0 +1,17 @@
+{
+  "expected_quadrats": 20,
+  "gps_accuracy_max_m": 5.0,
+  "duration_min_range": [
+    20,
+    240
+  ],
+  "expected_tz_offset": "+03:00",
+  "transect_length_m": [
+    45,
+    55
+  ],
+  "midpoint_max_offset_m": 25,
+  "typo_similarity_cutoff": 0.8,
+  "bearing_tolerance_deg": 15.0,
+  "belt_half_width_m": 2.5
+}
