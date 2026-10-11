@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Results overview</title>
+<script>try{var t=localStorage.getItem('ns-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>/* Results dashboard. Inlined into every page by src/dashboard.py. */
+:root {
+  --page:#f3f2ee; --s1:#fcfcfb; --s2:#f0efea; --ln:#e4e3de; --track:#e8e7e1;
+  --t1:#0b0b0b; --t2:#52514e; --t3:#77766f; --blue:#2a78d6; --muted-bar:#c9c8c1;
+  --answer-bg:#eaf2fc; --answer-ln:#bcd5f3; --answer-t:#1d5fae;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b; --info:#8a8983;
+  color-scheme: light;
+}
+/* Dark tokens: follow the OS until the viewer picks a theme (data-theme on <html>). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page:#121211; --s1:#1a1a19; --s2:#22221f; --ln:#2e2e2a; --track:#2a2a27;
+    --t1:#f0efec; --t2:#c3c2b7; --t3:#8f8e86; --blue:#3987e5; --muted-bar:#4a4944;
+    --answer-bg:#172030; --answer-ln:#23406a; --answer-t:#86b6ef; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page:#121211; --s1:#1a1a19; --s2:#22221f; --ln:#2e2e2a; --track:#2a2a27;
+  --t1:#f0efec; --t2:#c3c2b7; --t3:#8f8e86; --blue:#3987e5; --muted-bar:#4a4944;
+  --answer-bg:#172030; --answer-ln:#23406a; --answer-t:#86b6ef; color-scheme: dark;
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--page); color:var(--t1); font:13.5px/1.45 Inter, "Segoe UI", system-ui, -apple-system, sans-serif; }
+a { color:inherit; }
+code { font:12px ui-monospace, Consolas, monospace; }
+button, select, input { font:inherit; color:inherit; }
+:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+
+/* navigation */
+.nav { position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:6px 14px; flex-wrap:wrap;
+  padding:10px 24px; background:var(--s1); border-bottom:1px solid var(--ln); }
+.brand { font-weight:700; letter-spacing:-.01em; }
+.tabs { display:flex; gap:4px; overflow-x:auto; max-width:100%; }
+.tab { padding:7px 12px; border-radius:8px; color:var(--t2); text-decoration:none; white-space:nowrap; }
+.tab:hover { color:var(--t1); background:var(--s2); }
+.tab.on { color:var(--t1); background:var(--s2); box-shadow:inset 0 -2px 0 var(--blue); }
+.theme { margin-left:auto; display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:8px;
+  border:1px solid var(--ln); background:var(--s1); cursor:pointer; color:var(--t2); }
+.theme:hover { color:var(--t1); background:var(--s2); }
+.theme svg { width:15px; height:15px; }
+.theme .moon, .theme[data-mode="dark"] .sun { display:none; }
+.theme[data-mode="dark"] .moon { display:inline; }
+
+/* page frame */
+.wrap { max-width:1360px; margin:0 auto; padding:26px 24px 40px; }
+.eyebrow { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--t3); }
+h1 { font-size:28px; margin:4px 0; letter-spacing:-.02em; line-height:1.2; }
+.sub { color:var(--t2); margin:0 0 16px; max-width:900px; }
+.answer { background:var(--answer-bg); border:1px solid var(--answer-ln); border-radius:12px; padding:11px 14px; margin:0 0 14px; }
+.answer b { color:var(--answer-t); margin-right:4px; }
+.notice { border:1px dashed var(--t3); border-radius:12px; padding:16px 18px; color:var(--t2); background:var(--s1); }
+.notice b { color:var(--t1); }
+.stack { display:grid; gap:14px; }
+.grid { display:grid; grid-template-columns:7fr 5fr; gap:14px; align-items:start; }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:stretch; }
+.card { background:var(--s1); border:1px solid var(--ln); border-radius:14px; padding:16px 18px; min-width:0; }
+.card h2 { font-size:15px; margin:0; letter-spacing:-.01em; }
+.cs { color:var(--t3); font-size:12px; margin:2px 0 12px; }
+.src { color:var(--t3); font-size:11px; margin-top:12px; border-top:1px solid var(--ln); padding-top:8px; }
+.src code { color:var(--t2); font-size:11px; }
+.note { color:var(--t3); font-size:11.5px; margin-top:8px; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:9px; font-weight:600; font-size:12.5px;
+  text-decoration:none; cursor:pointer; border:1px solid transparent; white-space:nowrap; }
+.btn.primary { background:var(--t1); color:var(--s1); }
+.btn.primary:hover { opacity:.88; }
+.btn.ghost { padding:5px 10px; font-size:12px; background:transparent; color:var(--t2); border-color:var(--ln); }
+.btn.ghost:hover { background:var(--s2); color:var(--t1); }
+.actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+
+/* headline numbers */
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:14px; }
+.kpi { background:var(--s1); border:1px solid var(--ln); border-radius:14px; padding:14px 16px; }
+.kpis.mini { grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:12px; }
+.kpis.mini .kpi { background:var(--s2); border:0; border-radius:10px; padding:10px 12px; }
+.kv { font-size:26px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1.15; }
+.mini .kv { font-size:22px; }
+.kv small { font-size:15px; color:var(--t3); font-weight:500; }
+.kl { color:var(--t2); margin-top:2px; }
+.ks { color:var(--t3); font-size:11px; margin-top:2px; }
+
+/* status: never colour alone, always icon + label */
+.ic { flex:0 0 18px; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:800; font-style:normal; line-height:1; }
+.s-critical { background:var(--critical); color:#fff; } .s-serious { background:var(--serious); color:#111; }
+.s-warning { background:var(--warning); color:#111; } .s-good { background:var(--good); color:#fff; }
+.s-info { background:var(--info); color:#fff; }
+.chip { display:inline-flex; align-items:center; gap:6px; background:var(--s2); border-radius:20px; padding:2px 10px 2px 3px;
+  font-size:12px; white-space:nowrap; }
+.chip .ic { flex-basis:17px; width:17px; height:17px; }
+.sv { display:inline-block; width:9px; height:9px; border-radius:50%; margin:0 3px 0 6px; vertical-align:1px; }
+.fl { list-style:none; padding:0; margin:0 0 12px; }
+.fl li { display:flex; gap:9px; align-items:flex-start; padding:5px 0; }
+.fl .ic { margin-top:1px; }
+
+/* overview */
+.ov { display:flex; flex-direction:column; }
+.ovh { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--t2); display:flex; align-items:center; gap:8px; font-weight:600; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.q { font-size:17px; font-weight:650; letter-spacing:-.01em; margin:6px 0 12px; }
+.ov .actions { margin-top:auto; padding-top:12px; }
+.limits { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 4px; }
+.limits span { background:var(--s2); border-radius:8px; padding:6px 10px; color:var(--t2); font-size:12px; }
+.limits b { color:var(--t1); margin-right:4px; }
+.qs { margin:0; padding-left:20px; }
+.qs li { padding:7px 0; border-top:1px solid var(--ln); } .qs li:first-child { border-top:0; }
+.tag { display:inline-block; font-size:10.5px; font-weight:650; border-radius:6px; padding:1px 7px; margin-right:8px; }
+.tag-birds { background:color-mix(in srgb, var(--blue) 16%, transparent); color:color-mix(in srgb, var(--blue) 75%, var(--t1)); }
+.tag-vegetation { background:color-mix(in srgb, var(--good) 16%, transparent); color:color-mix(in srgb, var(--good) 70%, var(--t1)); }
+.rules { margin:0; padding-left:18px; } .rules li { padding:5px 0; color:var(--t2); } .rules b { color:var(--t1); }
+
+/* birds */
+.scs { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; }
+.sc { background:var(--s2); border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
+.scn { font-weight:650; font-size:14px; }
+.sc .chip { align-self:flex-start; background:var(--s1); }
+.scg { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; }
+.scg b { display:block; font-size:17px; font-variant-numeric:tabular-nums; } .scg b small { font-size:12px; color:var(--t3); font-weight:500; }
+.scg span { color:var(--t3); font-size:11px; }
+.scw { color:var(--t2); font-size:12px; border-top:1px solid var(--ln); padding-top:8px; }
+.cms { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:12px; }
+.cm { background:var(--s2); border-radius:10px; padding:10px 10px 8px; }
+.cmh { font-size:12.5px; font-weight:650; margin:0 4px 4px; }
+.cap { display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11.5px; color:var(--t2); margin:2px 4px 0; }
+.cap b { color:var(--t1); font-variant-numeric:tabular-nums; }
+.ln-solid, .ln-dot { display:inline-block; width:16px; height:0; vertical-align:3px; margin-right:4px; border-top:2px solid var(--c, var(--t2)); }
+.ln-dot { border-top-style:dotted; }
+.fu { display:grid; grid-template-columns:minmax(120px, 190px) 1fr minmax(90px, auto); gap:10px; align-items:center; margin:8px 0; }
+.ful { color:var(--t2); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fut { position:relative; height:14px; background:var(--track); border-radius:7px; }
+.fb { position:absolute; left:0; top:0; height:14px; border-radius:7px; min-width:3px; }
+.fb.pred { background:var(--muted-bar); }
+.fun { text-align:right; font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap; } .fun small { color:var(--t3); font-weight:500; }
+.lims { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; }
+.lims div { background:var(--s2); border-radius:10px; padding:10px 12px; }
+.lims b { display:block; font-size:17px; } .lims b small { font-size:12px; color:var(--t3); font-weight:500; }
+.lims span { color:var(--t2); font-size:12px; }
+
+/* vegetation */
+.mapwrap { background:var(--s2); border-radius:10px; border:1px solid var(--ln); padding:4px; }
+.legend { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:8px; color:var(--t2); font-size:12px; }
+.lg { display:inline-flex; align-items:center; gap:6px; } .lg b { color:var(--t1); }
+.ring { width:12px; height:12px; border-radius:50%; border:2px solid var(--blue); display:inline-block; }
+.xx { color:var(--critical); font-weight:800; }
+.fd { display:grid; grid-template-columns:22px 1fr auto; gap:10px; align-items:start; padding:10px 0; border-top:1px solid var(--ln); }
+.fd:first-of-type { border-top:0; }
+.ft { font-weight:600; } .fs { color:var(--t3); font-size:12px; }
+.fn { font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; } .fn small { font-size:12px; color:var(--t3); font-weight:500; }
+.prio { margin-top:12px; background:var(--s2); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--t2); }
+.prioh { color:var(--t1); font-weight:650; margin-bottom:6px; }
+.prio .pr { display:grid; grid-template-columns:17px 120px 1fr; gap:8px; align-items:center; padding:3px 0; }
+.prio .ic { width:17px; height:17px; }
+.prio b { color:var(--t1); font-weight:600; }
+.prio p { margin:8px 0 0; color:var(--t3); font-size:11.5px; }
+.br { display:grid; grid-template-columns:minmax(150px, 250px) 1fr 40px; gap:10px; align-items:center; margin:6px 0; }
+.bl { color:var(--t2); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; gap:6px; align-items:center; }
+.bl code { color:var(--t1); font-size:11px; }
+.bl .ic { width:14px; height:14px; flex-basis:14px; font-size:8px; }
+.bt { height:10px; background:var(--track); border-radius:5px; } .bf { height:10px; border-radius:5px; min-width:4px; }
+.bn { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
+.toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; color:var(--t2); font-size:12px; }
+.toolbar select { padding:6px 10px; border-radius:8px; border:1px solid var(--ln); background:var(--s1); }
+
+/* charts: every theme-dependent colour comes from a token */
+svg { display:block; overflow:visible; }
+.gr { stroke:var(--ln); stroke-width:1; }
+.ax { fill:var(--t3); font-size:10.5px; }
+.lb { fill:var(--t2); font-size:11px; font-weight:600; }
+.lbk { fill:var(--t1); }
+.halo { stroke:var(--s2); stroke-width:2; }
+.curve { stroke:var(--t1); stroke-width:2; fill:none; }
+.target { stroke:var(--t2); stroke-width:1; stroke-dasharray:3 3; }
+.firth { stroke:var(--t2); stroke-width:1.5; stroke-dasharray:2 3; }
+.leader { stroke:var(--t2); stroke-width:1; }
+.planned { fill:var(--s1); stroke:var(--blue); stroke-width:2.2; }
+.backup { fill:var(--t3); }
+.pt-ok { fill:var(--blue); opacity:.55; } .pt-bad { fill:var(--critical); }
+.stem-cont { stroke:var(--blue); } .dot-cont { fill:var(--blue); }
+.stem-flat { stroke:var(--info); } .dot-flat { fill:var(--info); }
+
+/* tables */
+.tw { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th { text-align:left; color:var(--t3); font-weight:500; font-size:11.5px; padding:7px 8px; border-bottom:1px solid var(--ln); vertical-align:bottom; }
+td { padding:8px; border-bottom:1px solid var(--ln); }
+tr:last-child td { border-bottom:0; }
+th.n, td.n { text-align:right; }
+th button.sort { all:unset; cursor:pointer; display:inline-flex; gap:4px; align-items:center; border-radius:4px; }
+th button.sort:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+th button.sort::after { content:"↕"; opacity:.35; font-size:10px; }
+th[aria-sort="ascending"] button.sort::after { content:"↑"; opacity:1; }
+th[aria-sort="descending"] button.sort::after { content:"↓"; opacity:1; }
+th[aria-sort] { color:var(--t1); }
+.ci { display:block; color:var(--t3); font-size:11px; }
+tbody tr:hover td { background:color-mix(in srgb, var(--s2) 70%, transparent); }
+
+/* files */
+.search { position:relative; width:280px; max-width:100%; }
+.search input { width:100%; padding:9px 12px 9px 34px; border-radius:10px; border:1px solid var(--ln); background:var(--s1); outline:none; }
+.search input:focus { border-color:var(--blue); }
+.search svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--t3); }
+.head-row { display:flex; gap:16px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin-bottom:18px; }
+.gh { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.gh span { color:var(--t3); font-size:12px; }
+.files { list-style:none; margin:0; padding:0; }
+.file { display:grid; grid-template-columns:auto 1fr auto auto; gap:14px; align-items:center; padding:11px 0; border-top:1px solid var(--ln); }
+.file:first-child { border-top:0; }
+.badge { font:700 10px ui-monospace, Consolas, monospace; padding:4px 0; width:44px; text-align:center; border-radius:6px; letter-spacing:.04em; }
+.b-csv { background:color-mix(in srgb, var(--good) 15%, transparent); color:color-mix(in srgb, var(--good) 65%, var(--t1)); }
+.b-json { background:color-mix(in srgb, var(--blue) 15%, transparent); color:color-mix(in srgb, var(--blue) 70%, var(--t1)); }
+.b-geo, .b-html { background:color-mix(in srgb, var(--serious) 18%, transparent); color:color-mix(in srgb, var(--serious) 55%, var(--t1)); }
+.b-png, .b-other { background:var(--s2); color:var(--t2); }
+.fmain { min-width:0; }
+.fname { font:600 13px ui-monospace, Consolas, monospace; text-decoration:none; word-break:break-all; }
+.fname:hover { color:var(--blue); text-decoration:underline; }
+.fdesc { color:var(--t2); font-size:12.5px; margin-top:1px; }
+.fdesc.missing { color:var(--t3); font-style:italic; }
+.fmeta { color:var(--t3); font-size:12px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.factions { display:flex; gap:6px; }
+.figs { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:14px; padding:6px 0 4px; }
+.fig { border-radius:12px; overflow:hidden; border:1px solid var(--ln); background:var(--s2); display:flex; flex-direction:column; }
+.fig:hover { border-color:var(--t3); }
+.fig > a { display:block; }
+.fig img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; object-position:top; background:#fff; }
+.fcap { padding:8px 10px; font-size:12px; font-weight:600; display:flex; gap:7px; align-items:center; background:var(--s1); flex:1; }
+.fcap .btn { margin-left:auto; }
+.fcode { font:600 10px ui-monospace, Consolas, monospace; color:var(--t3); background:var(--s2); padding:1px 5px; border-radius:4px; }
+.empty { text-align:center; color:var(--t3); padding:30px; }
+dialog { width:min(1100px, calc(100vw - 24px)); max-height:calc(100vh - 48px); padding:0; border:0; border-radius:16px;
+  background:var(--s1); color:var(--t1); box-shadow:0 20px 60px rgba(0,0,0,.35); }
+dialog::backdrop { background:rgba(10,10,8,.5); }
+.dh { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:14px 18px; border-bottom:1px solid var(--ln); }
+.dh h2 { margin:0; font:600 14px ui-monospace, Consolas, monospace; flex:1; word-break:break-all; }
+.dh small { color:var(--t3); }
+.db { overflow:auto; max-height:calc(100vh - 140px); }
+.db table { width:auto; font-size:12px; }
+.db th, .db td { white-space:nowrap; max-width:320px; overflow:hidden; text-overflow:ellipsis; }
+.db th { position:sticky; top:0; background:var(--s2); color:var(--t1); font-weight:650; }
+.db pre { margin:0; padding:16px 18px; font:12px/1.5 ui-monospace, Consolas, monospace; white-space:pre-wrap; word-break:break-word; }
+
+@media (max-width:900px) {
+  .grid, .two { grid-template-columns:1fr; }
+  .wrap { padding:20px 16px 32px; }
+  .nav { padding:10px 16px; }
+  h1 { font-size:23px; }
+  .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .kpis.mini { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .file { grid-template-columns:auto 1fr; }
+  .fmeta, .factions { grid-column:2; }
+  .br { grid-template-columns:minmax(0, 1fr) 30% 34px; }
+  .fu { grid-template-columns:minmax(0, 1fr) 30% auto; }
+  .prio .pr { grid-template-columns:17px 1fr; } .prio .pr span:last-child { grid-column:2; }
+}
+@media (max-width:480px) {
+  .kpis.mini .kv { font-size:18px; }
+  .kv { font-size:22px; }
+}
+figure.fig { margin:0; }
+.fcap { flex-wrap:wrap; }
+.lb { paint-order:stroke; stroke:var(--s2); stroke-width:3px; stroke-linejoin:round; }
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Dashboard pages"><span class="brand">Natural State results</span><div class="tabs"><a class="tab on" href="index.html" aria-current=page>Overview</a><a class="tab" href="birds.html">Birds</a><a class="tab" href="vegetation.html">Vegetation</a><a class="tab" href="files.html">Files</a></div>
+<button type="button" id="theme-toggle" class="theme" aria-pressed="false" aria-label="Dark theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span class="tlabel">Light</span></button></nav>
+<main class="wrap">
+<div class="eyebrow">Results overview</div>
+<h1>What the data support, and what needs review</h1>
+<p class="sub">Two independent analyses. Each page answers one question in the same order: the answer, headline numbers,
+the decision, the evidence, then the records to review.</p>
+<div class="two">
+  <section class="card ov"><div class="ovh"><span class="dot" style="background:var(--blue)"></span>Birds · BirdNET</div><div class="q">Which BirdNET predictions count as observations at fitted P(correct) ≥ 0.99?</div><div class="kpis mini"><div class="kpi"><div class="kv">29,491</div><div class="kl">predictions</div></div><div class="kpi"><div class="kv">3,147</div><div class="kl">observations</div></div><div class="kpi"><div class="kv">1<small>/4</small></div><div class="kl">species released</div></div></div><ul class="fl"><li><i class="ic s-good" aria-hidden="true">✓</i><span>Nightjar released: cutoff 0.667, 3,147 observations.</span></li><li><i class="ic s-warning" aria-hidden="true">!</i><span>Plover held: 538 fitted candidates rest on 1 expert error.</span></li><li><i class="ic s-info" aria-hidden="true">–</i><span>Oriole and Firefinch: the requested model cannot support a 0.99 cutoff.</span></li></ul><div class="cs"><span class="sv" style="background:var(--muted-bar)"></span>predictions <span class="sv" style="background:#fab219"></span>fitted candidates <span class="sv" style="background:#0ca30c"></span>released observations</div><div class="fu"><div class="ful">Abyssinian Nightjar</div><div class="fut" title="10,187 predictions · 3,147 fitted candidates · 3,147 released observations"><div class="fb pred" style="width:56.43%"></div><div class="fb" style="width:17.43%;background:#fab219"></div><div class="fb" style="width:17.43%;background:#0ca30c"></div></div><div class="fun">3,147<small> of 10,187</small></div></div><div class="fu"><div class="ful">Three-banded Plover</div><div class="fut" title="1,015 predictions · 538 fitted candidates · 0 released observations"><div class="fb pred" style="width:5.62%"></div><div class="fb" style="width:2.98%;background:#fab219"></div><div class="fb" style="width:0.00%;background:#0ca30c"></div></div><div class="fun">0<small> of 1,015</small></div></div><div class="fu"><div class="ful">African Black-headed Oriole</div><div class="fut" title="18,054 predictions · 0 fitted candidates · 0 released observations"><div class="fb pred" style="width:100.00%"></div><div class="fb" style="width:0.00%;background:#fab219"></div><div class="fb" style="width:0.00%;background:#0ca30c"></div></div><div class="fun">0<small> of 18,054</small></div></div><div class="fu"><div class="ful">Red-billed Firefinch</div><div class="fut" title="235 predictions · 0 fitted candidates · 0 released observations"><div class="fb pred" style="width:1.30%"></div><div class="fb" style="width:0.00%;background:#fab219"></div><div class="fb" style="width:0.00%;background:#0ca30c"></div></div><div class="fun">0<small> of 235</small></div></div><div class="limits"><span><b>205/551</b>checks link uniquely to a prediction</span><span><b>Recall</b>unavailable</span><span><b>99%</b>fitted, not certified</span></div><div class="src">Source: <code>bird_label_summary.csv</code>, <code>bird_thresholds.csv</code>, <code>bird_validation_link_audit.csv</code></div><div class="actions"><a class="btn primary" href="birds.html">Open birds page →</a></div></section>
+  <section class="card ov"><div class="ovh"><span class="dot" style="background:var(--good)"></span>Vegetation · herbaceous QA</div><div class="q">Are the herbaceous survey records fit for analysis, and what must be reviewed first?</div><div class="kpis mini"><div class="kpi"><div class="kv">30<small>/32</small></div><div class="kl">submissions analysed</div></div><div class="kpi"><div class="kv">29<small>/36</small></div><div class="kl">primaries surveyed</div></div><div class="kpi"><div class="kv">1 · 271</div><div class="kl">errors · warnings</div></div></div><ul class="fl"><li><i class="ic s-warning" aria-hidden="true">!</i><span>All 30 transects run roughly east–west (median 104°), not north–south.</span></li><li><i class="ic s-critical" aria-hidden="true">▲</i><span>Plots 05, 27 and 13: 50% or more of the quadrats lie off the registered line.</span></li><li><i class="ic s-warning" aria-hidden="true">!</i><span>6 primary plots (31–36) were never registered.</span></li></ul><div class="mapwrap"><svg viewBox="0 0 760 300" width="100%" role="img" aria-label="Map of 30 registered plots coloured by spatial review priority"><circle cx="551.6" cy="271.5" r="2.5" class="backup"><title>Plot 45: backup, unused</title></circle><circle cx="390.4" cy="241.0" r="2.5" class="backup"><title>Plot 44: backup, unused</title></circle><circle cx="245.5" cy="213.0" r="2.5" class="backup"><title>Plot 43: backup, unused</title></circle><circle cx="530.6" cy="266.6" r="2.5" class="backup"><title>Plot 42: backup, unused</title></circle><circle cx="350.4" cy="205.2" r="2.5" class="backup"><title>Plot 41: backup, unused</title></circle><circle cx="87.1" cy="243.1" r="2.5" class="backup"><title>Plot 40: backup, unused</title></circle><circle cx="352.6" cy="190.1" r="2.5" class="backup"><title>Plot 39: backup, unused</title></circle><circle cx="212.8" cy="207.8" r="2.5" class="backup"><title>Plot 38: backup, unused</title></circle><circle cx="561.5" cy="66.3" r="2.5" class="backup"><title>Plot 37: backup, unused</title></circle><g><title>Plot 23: registered non-viable</title><text x="548.7" y="205.0" text-anchor="middle" class="xx" fill="#d03b3b">✕</text><text x="557.7" y="204.0" class="lb">23</text></g><g><title>Plot 31: primary, not registered</title><circle cx="672.9" cy="266.3" r="6" class="planned"/><text x="681.9" y="270.3" class="lb">31</text></g><g><title>Plot 32: primary, not registered</title><circle cx="656.0" cy="198.8" r="6" class="planned"/><text x="665.0" y="202.8" class="lb">32</text></g><g><title>Plot 33: primary, not registered</title><circle cx="637.2" cy="189.6" r="6" class="planned"/><text x="646.2" y="193.6" class="lb">33</text></g><g><title>Plot 34: primary, not registered</title><circle cx="666.2" cy="26.0" r="6" class="planned"/><text x="675.2" y="30.0" class="lb">34</text></g><g><title>Plot 35: primary, not registered</title><circle cx="639.1" cy="131.2" r="6" class="planned"/><text x="648.1" y="135.2" class="lb">35</text></g><g><title>Plot 36: primary, not registered</title><circle cx="661.8" cy="56.2" r="6" class="planned"/><text x="670.8" y="60.2" class="lb">36</text></g><circle cx="660.9" cy="222.7" r="2.5" class="backup"><title>Plot 47: backup, unused</title></circle><circle cx="646.1" cy="140.1" r="2.5" class="backup"><title>Plot 48: backup, unused</title></circle><circle cx="648.3" cy="114.2" r="2.5" class="backup"><title>Plot 49: backup, unused</title></circle><circle cx="652.5" cy="62.4" r="2.5" class="backup"><title>Plot 50: backup, unused</title></circle><circle cx="648.2" cy="103.3" r="2.5" class="backup"><title>Plot 51: backup, unused</title></circle><circle cx="285.4" cy="216.2" r="5.5" fill="#0ca30c" class="halo"><title>Plot 24: No spatial flags · 0/20 quadrats off the line</title></circle><circle cx="182.1" cy="219.2" r="5.5" fill="#0ca30c" class="halo"><title>Plot 17: No spatial flags · 0/20 quadrats off the line</title></circle><circle cx="268.5" cy="214.0" r="5.5" fill="#0ca30c" class="halo"><title>Plot 02: No spatial flags · 0/20 quadrats off the line</title></circle><circle cx="341.1" cy="210.9" r="5.5" fill="#fab219" class="halo"><title>Plot 15: Warning · 4/20 quadrats off the line</title></circle><circle cx="598.4" cy="262.4" r="5.5" fill="#fab219" class="halo"><title>Plot 30: Warning · 4/20 quadrats off the line</title></circle><circle cx="523.7" cy="257.6" r="5.5" fill="#fab219" class="halo"><title>Plot 03: Warning · 3/20 quadrats off the line</title></circle><circle cx="381.3" cy="268.7" r="5.5" fill="#fab219" class="halo"><title>Plot 25: Warning · 2/20 quadrats off the line</title></circle><circle cx="453.0" cy="244.7" r="5.5" fill="#fab219" class="halo"><title>Plot 21: Warning · 2/20 quadrats off the line</title></circle><circle cx="467.2" cy="240.7" r="5.5" fill="#fab219" class="halo"><title>Plot 29: Warning · 2/20 quadrats off the line</title></circle><circle cx="329.3" cy="211.1" r="5.5" fill="#fab219" class="halo"><title>Plot 20: Warning · 2/20 quadrats off the line</title></circle><circle cx="488.5" cy="257.1" r="5.5" fill="#fab219" class="halo"><title>Plot 11: Warning · 2/20 quadrats off the line</title></circle><circle cx="567.8" cy="274.0" r="5.5" fill="#fab219" class="halo"><title>Plot 26: Warning · 4/20 quadrats off the line</title></circle><circle cx="607.5" cy="266.3" r="5.5" fill="#fab219" class="halo"><title>Plot 10: Warning · 2/20 quadrats off the line</title></circle><circle cx="514.1" cy="253.7" r="5.5" fill="#fab219" class="halo"><title>Plot 22: Warning · 2/20 quadrats off the line</title></circle><circle cx="542.4" cy="266.9" r="5.5" fill="#fab219" class="halo"><title>Plot 16: Warning · 0/20 quadrats off the line</title></circle><circle cx="598.9" cy="84.8" r="5.5" fill="#fab219" class="halo"><title>Plot 46: Warning · 1/20 quadrats off the line</title></circle><circle cx="569.3" cy="183.3" r="5.5" fill="#fab219" class="halo"><title>Plot 09: Warning · 2/20 quadrats off the line</title></circle><circle cx="147.4" cy="229.4" r="5.5" fill="#fab219" class="halo"><title>Plot 12: Warning · 2/20 quadrats off the line</title></circle><circle cx="388.3" cy="256.0" r="5.5" fill="#fab219" class="halo"><title>Plot 18: Warning · 1/20 quadrats off the line</title></circle><circle cx="257.2" cy="213.3" r="5.5" fill="#fab219" class="halo"><title>Plot 28: Warning · 0/20 quadrats off the line</title></circle><circle cx="352.7" cy="222.7" r="5.5" fill="#ec835a" class="halo"><title>Plot 07: Serious · 9/20 quadrats off the line</title></circle><circle cx="588.8" cy="268.2" r="5.5" fill="#ec835a" class="halo"><title>Plot 19: Serious · 9/20 quadrats off the line</title></circle><circle cx="620.6" cy="262.1" r="5.5" fill="#ec835a" class="halo"><title>Plot 14: Serious · 7/20 quadrats off the line</title></circle><circle cx="96.4" cy="236.7" r="5.5" fill="#ec835a" class="halo"><title>Plot 08: Serious · 6/20 quadrats off the line</title></circle><circle cx="376.4" cy="245.0" r="5.5" fill="#ec835a" class="halo"><title>Plot 04: Serious · 5/20 quadrats off the line</title></circle><circle cx="133.7" cy="222.7" r="5.5" fill="#ec835a" class="halo"><title>Plot 06: Serious · 6/20 quadrats off the line</title></circle><circle cx="245.9" cy="223.7" r="5.5" fill="#ec835a" class="halo"><title>Plot 01: Serious · 5/20 quadrats off the line</title></circle><circle cx="579.3" cy="273.9" r="7" fill="#d03b3b" class="halo"><title>Plot 27: Critical · 12/20 quadrats off the line</title></circle><circle cx="233.6" cy="213.1" r="7" fill="#d03b3b" class="halo"><title>Plot 13: Critical · 11/20 quadrats off the line</title></circle><circle cx="571.1" cy="71.5" r="7" fill="#d03b3b" class="halo"><title>Plot 05: Critical · 19/20 quadrats off the line</title></circle><line x1="579.3" y1="273.9" x2="588.3" y2="285.9" class="leader"/><text x="588.3" y="289.9" class="lb lbk">Plot 27</text><line x1="233.6" y1="213.1" x2="245.6" y2="187.1" class="leader"/><text x="245.6" y="191.1" class="lb lbk">Plot 13</text><line x1="571.1" y1="71.5" x2="583.1" y2="45.5" class="leader"/><text x="583.1" y="49.5" class="lb lbk">Plot 05</text></svg></div><div class="legend"><span class="lg"><i class="ic s-critical" aria-hidden="true">▲</i>Critical <b>3</b></span><span class="lg"><i class="ic s-serious" aria-hidden="true">◆</i>Serious <b>7</b></span><span class="lg"><i class="ic s-warning" aria-hidden="true">!</i>Warning <b>17</b></span><span class="lg"><i class="ic s-good" aria-hidden="true">✓</i>No spatial flags <b>3</b></span><span class="lg"><span class="ring"></span>Primary, not registered <b>6</b></span><span class="lg"><span class="xx">✕</span>Non-viable <b>1</b></span></div><div class="src">Source: <code>vegetation_transect_geometry.csv</code>, <code>veg_plot_summary.csv</code>, <code>vegetation_plot_coverage.csv</code></div><div class="actions"><a class="btn primary" href="vegetation.html">Open vegetation page →</a><a class="btn ghost" href="../transect_map.html">Interactive map</a></div></section>
+</div>
+<div class="two" style="margin-top:14px">
+  <section class="card"><h2>Questions for Natural State</h2><div class="cs">Decisions the data cannot settle on their own</div><ol class="qs"><li><span class="tag tag-birds">Birds</span>Was the 551-clip validation sample drawn from this prediction file? Only 205 clips link uniquely.</li><li><span class="tag tag-birds">Birds</span>How should species with no expert errors, or very few, be handled?</li><li><span class="tag tag-birds">Birds</span>Which BirdNET sensitivity setting produced these scores? 1.0 is assumed.</li><li><span class="tag tag-vegetation">Vegetation</span>Are transects laid east–west in practice, or were endpoints captured wrongly?</li><li><span class="tag tag-vegetation">Vegetation</span>Why does the stored &#x27;quadrats with species&#x27; count differ from the form&#x27;s formula in 23 of 32 submissions?</li><li><span class="tag tag-vegetation">Vegetation</span>Did backup Plot 46 replace non-viable Plot 23, and why were primaries 31–36 not registered?</li></ol></section>
+  <section class="card"><h2>How to read these pages</h2><div class="cs">Conventions used throughout</div><ul class="rules"><li><b>Status is never colour alone.</b> Every coloured mark carries an icon and a label.</li><li><b>Flags request review.</b> No field value, name or coordinate is corrected.</li><li><b>A fitted 99% is not certified precision.</b> No species reaches 99% on a strict lower bound; that would need about 299 error-free checks.</li><li><b>Recall is unavailable.</b> Calls BirdNET missed were never annotated.</li><li><b>Every panel names its source file</b> in <code>outputs/</code>, so each number can be traced.</li></ul><div class="src">Versions: <code>takehome-glm-v1</code> · <code>takehome-policy-v2</code> · <code>vegetation-qa-v2</code></div><div class="actions"><a class="btn ghost" href="files.html">All output files →</a></div></section>
+</div></main>
+<script>// Results dashboard behaviour. Inlined into every page by src/dashboard.py.
+// No network access: previews read data embedded in the page at build time.
+(() => {
+  const root = document.documentElement;
+
+  // ---- Theme toggle: OS setting until the viewer chooses; choice kept in localStorage.
+  const toggle = document.getElementById('theme-toggle');
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const effective = () => root.dataset.theme || (mq.matches ? 'dark' : 'light');
+  const paint = () => {
+    const dark = effective() === 'dark';
+    toggle.setAttribute('aria-pressed', String(dark));
+    toggle.dataset.mode = dark ? 'dark' : 'light';
+    toggle.querySelector('.tlabel').textContent = dark ? 'Dark' : 'Light';
+  };
+  toggle.addEventListener('click', () => {
+    const next = effective() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('ns-theme', next); } catch (e) { /* storage blocked: theme lasts for this page only */ }
+    paint();
+  });
+  if (mq.addEventListener) mq.addEventListener('change', paint);
+  paint();
+
+  // ---- Sortable tables: numbers sort numerically (cells may carry data-v), text alphabetically.
+  const cellValue = (row, i) => {
+    const cell = row.cells[i];
+    const raw = cell.dataset.v !== undefined ? cell.dataset.v : cell.textContent.trim();
+    const num = Number(raw);
+    return raw !== '' && !Number.isNaN(num) ? num : raw.toLowerCase();
+  };
+  const compare = (a, b) => {
+    if (typeof a === typeof b) return a < b ? -1 : a > b ? 1 : 0;
+    return typeof a === 'number' ? -1 : 1;
+  };
+  document.querySelectorAll('table.sortable').forEach(table => {
+    const heads = [...table.tHead.rows[0].cells];
+    heads.forEach((th, i) => {
+      const button = th.querySelector('button.sort');
+      if (!button) return;
+      button.addEventListener('click', () => {
+        const asc = th.getAttribute('aria-sort') !== 'ascending';
+        heads.forEach(h => h.removeAttribute('aria-sort'));
+        th.setAttribute('aria-sort', asc ? 'ascending' : 'descending');
+        const body = table.tBodies[0];
+        [...body.rows]
+          .sort((r1, r2) => compare(cellValue(r1, i), cellValue(r2, i)) * (asc ? 1 : -1))
+          .forEach(r => body.appendChild(r));
+      });
+    });
+  });
+
+  // ---- Vegetation review queue: filter rows by review priority.
+  const priority = document.getElementById('priority-filter');
+  if (priority) {
+    priority.addEventListener('change', () => {
+      let shown = 0;
+      document.querySelectorAll('#queue tbody tr').forEach(r => {
+        r.hidden = Boolean(priority.value) && r.dataset.priority !== priority.value;
+        shown += r.hidden ? 0 : 1;
+      });
+      document.getElementById('queue-count').textContent = shown;
+    });
+  }
+
+  // ---- Files page: filter by name or description.
+  const filter = document.getElementById('file-filter');
+  if (filter) {
+    filter.addEventListener('input', () => {
+      const term = filter.value.trim().toLowerCase();
+      let total = 0;
+      document.querySelectorAll('.group').forEach(group => {
+        let shown = 0;
+        group.querySelectorAll('[data-search]').forEach(el => {
+          const hit = !term || el.dataset.search.includes(term);
+          el.hidden = !hit;
+          shown += hit ? 1 : 0;
+        });
+        group.hidden = shown === 0;
+        total += shown;
+      });
+      document.getElementById('no-match').hidden = total > 0;
+    });
+  }
+
+  // ---- Files page: previews embedded at build time, shown in a modal dialog.
+  const dataEl = document.getElementById('preview-data');
+  const dialog = document.getElementById('preview');
+  if (dataEl && dialog) {
+    const previews = JSON.parse(dataEl.textContent);
+    const body = dialog.querySelector('.db');
+    const el = (tag, text) => { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; return e; };
+    const show = name => {
+      const p = previews[name];
+      dialog.querySelector('h2').textContent = name;
+      dialog.querySelector('small').textContent = p.note || '';
+      dialog.querySelector('a.btn').setAttribute('href', p.href);
+      body.replaceChildren();
+      if (p.kind === 'table') {
+        const table = el('table'), head = el('tr'), tbody = el('tbody');
+        p.header.forEach(h => { const th = el('th', h); th.scope = 'col'; th.title = h; head.appendChild(th); });
+        table.appendChild(el('thead')).appendChild(head);
+        p.rows.forEach(row => {
+          const tr = el('tr');
+          row.forEach(v => { const td = el('td', v); td.title = v; tr.appendChild(td); });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        body.appendChild(table);
+      } else {
+        body.appendChild(el('pre', p.text));
+      }
+      dialog.showModal();
+    };
+    document.querySelectorAll('[data-preview]').forEach(b => b.addEventListener('click', () => show(b.dataset.preview)));
+    dialog.querySelector('.close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+  }
+})();
+</script>
+</body>
+</html>
