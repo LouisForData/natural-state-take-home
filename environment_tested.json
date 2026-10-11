@@ -32,9 +32,9 @@
     "platform": "Windows",
     "pytest": "9.1.1",
     "command": "python -m pytest -v",
-    "tests_passed": 22,
+    "tests_passed": 26,
     "analysis_policy_cases": 13,
-    "dashboard_cases": 9,
-    "duration_seconds": 2.58
+    "dashboard_cases": 13,
+    "duration_seconds": 8.13
   }
 }

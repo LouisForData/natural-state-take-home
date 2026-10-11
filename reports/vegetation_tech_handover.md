@@ -44,7 +44,7 @@ Confirm form versions/calculation history; field rotation justifications; unusua
 
 ## Dashboard prototype
 
-`src/dashboard.py` writes a static four-page dashboard to `outputs/dashboard/` (run by the last cell of notebook 02, or `python -m src.dashboard`). It reads exported files only and adds no analysis. Review priority comes from `transect_priorities()` in `src/transect_map.py`, so the dashboard and the interactive map cannot disagree. Run notebook 01 first; without bird outputs the bird panels show a notice instead.
+`src/dashboard.py` writes a static four-page dashboard to `outputs/dashboard/`, with images in `outputs/dashboard/assets/` (run by the last cell of notebook 02, or `python -m src.dashboard`). It reads exported files only and adds no analysis. Review priority comes from `transect_priorities()` in `src/transect_map.py`, so the dashboard and the interactive map cannot disagree. Run notebook 01 first; without bird outputs the bird panels show a notice instead.
 
 | Page and panel | Source |
 |---|---|
@@ -56,4 +56,4 @@ Confirm form versions/calculation history; field rotation justifications; unusua
 | Vegetation · plot review queue | `veg_plot_summary.csv`, `vegetation_transect_geometry.csv`, `veg_sampling_effort.csv`, `veg_qa_flags.csv` |
 | Birds · decisions, calibration, evidence and limits | `bird_thresholds.csv`, `bird_label_summary.csv`, `bird_validation_metrics.csv`, `bird_checked_cutoff_evidence.csv`, `bird_bin_weighted_precision.csv`, `bird_firth_sensitivity.csv`, `bird_validation_link_audit.csv`, `data/raw/validation_results.csv` |
 | Overview | The bird and vegetation sources above |
-| Files | Every file in `outputs/`, with previews embedded at build time |
+| Files | `src/dashboard_files.py`: every notebook, output, report and code file Git publishes (git-ignored raw inputs are left out), grouped and filterable, with previews embedded at build time, downloads of the real files, `manifest.json` and a ZIP of `outputs/` |

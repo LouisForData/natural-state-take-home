@@ -1,10 +1,12 @@
 # Natural State take-home
 
+**Live dashboard:** <https://louisfordata.github.io/natural-state-take-home/> (GitHub Pages, served from `outputs/dashboard/`)
+
 Two explanatory notebooks turn BirdNET predictions into auditable labels and vegetation exports into traceable quality findings. The notebooks follow **question, reason, code, result and decision**. Reusable rules live in `src/`; written conclusions live in `reports/`.
 
 ## Start here
 
-For a quick review, download or clone this repository and open `outputs/dashboard/index.html` locally. The dashboard presents the saved results and provides previews and downloads. Reproducing the analysis requires the original input files supplied with the take-home brief.
+For a quick review, open the [live dashboard](https://louisfordata.github.io/natural-state-take-home/), or download or clone this repository and open `outputs/dashboard/index.html` locally. The dashboard presents the saved results and provides previews and downloads. Reproducing the analysis requires the original input files supplied with the take-home brief.
 
 1. Review [bird analysis](notebooks/01_bird_analysis.ipynb), then [vegetation quality checks](notebooks/02_vegetation_quality_checks.ipynb).
 2. Read [bird findings](reports/bird_analysis.md) and [vegetation findings](reports/vegetation_quality_report.md).
@@ -58,9 +60,9 @@ python -m pytest -v
 python -m jupyterlab
 ```
 
-The suite contains **17 test functions and 22 test cases**: eight analysis-policy functions covering 13 cases, including parameterized scenarios, and nine dashboard tests.
+The suite contains **21 test functions and 26 test cases**: eight analysis-policy functions covering 13 cases, including parameterized scenarios, and thirteen dashboard tests.
 
-The verified local Windows run on **11 October 2026** passed all **22 cases in 2.58 seconds**, using **Python 3.12.10** and **pytest 9.1.1**. This verifies the automated tests; it does not establish that both notebooks were executed in fresh Windows Jupyter kernels.
+The verified local Windows run on **11 October 2026** passed all **26 cases in 8.13 seconds**, using **Python 3.12.10** and **pytest 9.1.1**. This verifies the automated tests; it does not establish that both notebooks were executed in fresh Windows Jupyter kernels.
 
 To run the test files separately:
 
@@ -84,9 +86,9 @@ The dashboard contains four pages:
 | Overview | Headline findings and links to the analyses |
 | Birds | Species decisions, calibration plots, candidate and observation counts, and supporting evidence |
 | Vegetation | Spatial review priorities, project findings, sampling effort and a filterable plot review queue |
-| Files | Embedded previews and downloads of generated outputs |
+| Files | Notebooks, outputs, figures, reports and code in this repository, with category filters, embedded previews, downloads and a ZIP of all outputs |
 
-Open `outputs/dashboard/index.html` directly, or open `outputs/index.html`, which redirects to the dashboard. Dashboard pages, embedded charts and file previews work offline. The light/dark theme preference is remembered across pages where browser storage is available.
+Open `outputs/dashboard/index.html` directly, or open `index.html` or `outputs/index.html`, which redirect to the dashboard. The Files page lists only files that Git publishes, so git-ignored raw inputs and reference documents are neither listed nor excerpted. Species images in `outputs/dashboard/assets/` are illustrations, not identification evidence. Dashboard pages, embedded charts and file previews work offline. The light/dark theme preference is remembered across pages where browser storage is available.
 
 Rebuild the dashboard from the existing outputs:
 
@@ -96,13 +98,15 @@ python -m src.dashboard
 
 The vegetation notebook also includes a final dashboard build cell. The dashboard reads existing analysis outputs rather than fitting models or changing QA rules.
 
-To serve the saved results locally:
+To serve the saved results locally, run this from the project root:
 
 ```bash
-python -m http.server 8000 --bind 127.0.0.1 --directory outputs
+python -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open <http://127.0.0.1:8000/>. Press **Ctrl+C** in the terminal to stop the server.
+Open <http://127.0.0.1:8000/>. Press **Ctrl+C** in the terminal to stop the server. Serving only `outputs/` (`--directory outputs`) also works, but files outside `outputs/` (notebooks, reports, code) are then unreachable; the Files page says so.
+
+The same files are published with GitHub Pages from the `main` branch root; `.nojekyll` makes Pages serve them unchanged.
 
 The full interactive `transect_map.html` uses external map tiles and JavaScript resources, so it requires internet access. A static map is available at `outputs/figures/B9_transect_map.png`.
 

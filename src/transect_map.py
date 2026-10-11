@@ -31,6 +31,9 @@ PLANNED_BLUE = "#2a78d6"
 NEUTRAL = "#8a8983"
 QUAD_ON = "#26323f"
 
+# The map is saved as outputs/transect_map.html, beside the dashboard folder.
+DASHBOARD_DIR = "dashboard/"
+
 # Survey-area and stratum outlines. No official boundary is supplied, so these are drawn around the
 # planned plot locations and labelled as such. Colours avoid the status and planned-location palette.
 AREA_BUFFER_M = 600
@@ -322,6 +325,10 @@ html, body { font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-seri
   border-radius:14px; box-shadow:0 10px 30px rgba(15,15,10,.16), 0 1px 3px rgba(15,15,10,.1); }
 .ns-panel { top:12px; left:12px; width:300px; max-width:calc(100% - 24px); padding:14px 16px 12px; font-size:12px; }
 .ns-panel h1 { font-size:16px; margin:0; letter-spacing:-.01em; }
+.ns-back { display:flex; gap:6px; margin:-2px 0 10px; }
+.ns-back a { font-size:11.5px; font-weight:600; color:#2647a0; text-decoration:none; padding:3px 9px; border-radius:7px;
+  border:1px solid #cdd9ee; background:#f2f6fc; }
+.ns-back a:hover { background:#e4ecf9; }
 .ns-panel .sub { color:var(--ink3); font-size:11px; margin:2px 0 10px; }
 .ns-kpis { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
 .ns-kpi { background:#f3f2ee; border-radius:9px; padding:7px 9px; }
@@ -334,7 +341,7 @@ html, body { font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-seri
 .ns-ctrl select { flex:1; min-width:0; }
 .ns-ctrl button { cursor:pointer; }
 .ns-legend { left:12px; bottom:56px; padding:10px 12px; font-size:11px; width:230px;
-  max-height:calc(100vh - 430px); min-height:120px; overflow:auto; }
+  max-height:calc(100vh - 470px); min-height:110px; overflow:auto; }
 .ns-legend h2 { font-size:11px; margin:0 0 6px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink2); }
 .ns-legend .it { display:flex; align-items:center; gap:7px; margin:3px 0; }
 .ns-legend .sw { width:16px; display:inline-flex; justify-content:center; }
@@ -578,6 +585,7 @@ def build_transect_map(transects, qgeom, centroids, coverage, flags, survey, plo
                       for t, _, s, _ in sorted(records, key=lambda r: r[0].plot_name))
     panel = f"""
     <div class="ns-panel">
+      <nav class="ns-back" aria-label="Back to the dashboard"><a href="{DASHBOARD_DIR}vegetation.html">← Vegetation review</a><a href="{DASHBOARD_DIR}index.html">Overview</a></nav>
       <h1>{_esc(title)}</h1>
       <div class="sub">{_esc(project)} · area {_esc(area)} · recorded positions, uncorrected</div>
       <div class="ns-kpis">

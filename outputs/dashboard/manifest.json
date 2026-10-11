@@ -1,0 +1,830 @@
+[
+  {
+    "path": "notebooks/01_bird_analysis.ipynb",
+    "name": "01_bird_analysis.ipynb",
+    "category": "notebooks",
+    "tags": [
+      "birdnet",
+      "notebooks"
+    ],
+    "type": "IPYNB",
+    "size_bytes": 536935,
+    "description": "Calibration, threshold fitting, species review and validation audit",
+    "href": "../../notebooks/01_bird_analysis.ipynb",
+    "meta": "40 cells \u00b7 524.4 KB"
+  },
+  {
+    "path": "notebooks/02_vegetation_quality_checks.ipynb",
+    "name": "02_vegetation_quality_checks.ipynb",
+    "category": "notebooks",
+    "tags": [
+      "notebooks",
+      "vegetation"
+    ],
+    "type": "IPYNB",
+    "size_bytes": 2775587,
+    "description": "Survey completeness, spatial alignment, QA rules, sampling effort and this dashboard",
+    "href": "../../notebooks/02_vegetation_quality_checks.ipynb",
+    "meta": "42 cells \u00b7 2.6 MB"
+  },
+  {
+    "path": "data/README.md",
+    "name": "README.md",
+    "category": "inputs",
+    "tags": [
+      "methods"
+    ],
+    "type": "MD",
+    "size_bytes": 673,
+    "description": "How the supplied inputs are handled, and why raw files are not published",
+    "href": "../../data/README.md",
+    "meta": "6 lines \u00b7 673 B"
+  },
+  {
+    "path": "data/input_manifest.csv",
+    "name": "input_manifest.csv",
+    "category": "inputs",
+    "tags": [
+      "methods"
+    ],
+    "type": "CSV",
+    "size_bytes": 2551,
+    "description": "SHA-256 fingerprints and sizes of every supplied input and reference file",
+    "href": "../../data/input_manifest.csv",
+    "meta": "23 rows \u00b7 3 cols \u00b7 2.5 KB"
+  },
+  {
+    "path": "outputs/birdnet_predictions_labelled.csv",
+    "name": "birdnet_predictions_labelled.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 7439863,
+    "description": "All BirdNET predictions with fitted threshold, P(correct) and observation label",
+    "href": "../birdnet_predictions_labelled.csv",
+    "meta": "29,491 rows \u00b7 23 cols \u00b7 7.1 MB"
+  },
+  {
+    "path": "outputs/bird_label_summary.csv",
+    "name": "bird_label_summary.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 225,
+    "description": "Predictions, fitted candidates and released observations per species",
+    "href": "../bird_label_summary.csv",
+    "meta": "4 rows \u00b7 5 cols \u00b7 225 B"
+  },
+  {
+    "path": "outputs/bird_thresholds.csv",
+    "name": "bird_thresholds.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 1532,
+    "description": "Fitted P(correct) cutoffs, coefficients and support status by species",
+    "href": "../bird_thresholds.csv",
+    "meta": "4 rows \u00b7 26 cols \u00b7 1.5 KB"
+  },
+  {
+    "path": "outputs/bird_findings.json",
+    "name": "bird_findings.json",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "JSON",
+    "size_bytes": 219,
+    "description": "Machine-readable headline numbers behind the bird report",
+    "href": "../bird_findings.json",
+    "meta": "7 fields \u00b7 219 B"
+  },
+  {
+    "path": "outputs/bird_validation_metrics.csv",
+    "name": "bird_validation_metrics.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 395,
+    "description": "Checked-sample precision per species with Wilson 95% interval",
+    "href": "../bird_validation_metrics.csv",
+    "meta": "4 rows \u00b7 7 cols \u00b7 395 B"
+  },
+  {
+    "path": "outputs/bird_validation_score_bins.csv",
+    "name": "bird_validation_score_bins.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 2493,
+    "description": "Validation sample by confidence bin, with prediction counts and weights",
+    "href": "../bird_validation_score_bins.csv",
+    "meta": "36 rows \u00b7 6 cols \u00b7 2.4 KB"
+  },
+  {
+    "path": "outputs/bird_bin_weighted_precision.csv",
+    "name": "bird_bin_weighted_precision.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 558,
+    "description": "Precision re-weighted to the full prediction distribution",
+    "href": "../bird_bin_weighted_precision.csv",
+    "meta": "4 rows \u00b7 7 cols \u00b7 558 B"
+  },
+  {
+    "path": "outputs/bird_checked_cutoff_evidence.csv",
+    "name": "bird_checked_cutoff_evidence.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 432,
+    "description": "Checked outcomes and one-sided 95% lower bound at each cutoff",
+    "href": "../bird_checked_cutoff_evidence.csv",
+    "meta": "4 rows \u00b7 8 cols \u00b7 432 B"
+  },
+  {
+    "path": "outputs/bird_raw_cutoff_diagnostic.csv",
+    "name": "bird_raw_cutoff_diagnostic.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 1061,
+    "description": "Checked precision and predictions retained at raw score cutoffs",
+    "href": "../bird_raw_cutoff_diagnostic.csv",
+    "meta": "24 rows \u00b7 5 cols \u00b7 1.0 KB"
+  },
+  {
+    "path": "outputs/bird_clipping_sensitivity.csv",
+    "name": "bird_clipping_sensitivity.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 672,
+    "description": "How the cutoff moves with the probability clipping epsilon",
+    "href": "../bird_clipping_sensitivity.csv",
+    "meta": "12 rows \u00b7 4 cols \u00b7 672 B"
+  },
+  {
+    "path": "outputs/bird_firth_sensitivity.csv",
+    "name": "bird_firth_sensitivity.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 872,
+    "description": "Firth-penalised fits as a check on separation",
+    "href": "../bird_firth_sensitivity.csv",
+    "meta": "4 rows \u00b7 13 cols \u00b7 872 B"
+  },
+  {
+    "path": "outputs/bird_validation_link_audit.csv",
+    "name": "bird_validation_link_audit.csv",
+    "category": "bird",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "CSV",
+    "size_bytes": 3783,
+    "description": "Validation-to-prediction record-link review",
+    "href": "../bird_validation_link_audit.csv",
+    "meta": "551 rows \u00b7 2 cols \u00b7 3.7 KB"
+  },
+  {
+    "path": "outputs/veg_survey_summary.csv",
+    "name": "veg_survey_summary.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 453,
+    "description": "Survey-level counts: submissions, plots, quadrats, taxa and flags",
+    "href": "../veg_survey_summary.csv",
+    "meta": "18 rows \u00b7 2 cols \u00b7 453 B"
+  },
+  {
+    "path": "outputs/veg_plot_summary.csv",
+    "name": "veg_plot_summary.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 5565,
+    "description": "Plot-level summaries, flag counts and spatial roll-up per submission",
+    "href": "../veg_plot_summary.csv",
+    "meta": "32 rows \u00b7 17 cols \u00b7 5.4 KB"
+  },
+  {
+    "path": "outputs/veg_sampling_effort.csv",
+    "name": "veg_sampling_effort.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 6704,
+    "description": "Species accumulation per plot and an effort verdict",
+    "href": "../veg_sampling_effort.csv",
+    "meta": "30 rows \u00b7 9 cols \u00b7 6.5 KB"
+  },
+  {
+    "path": "outputs/veg_observations_long.csv",
+    "name": "veg_observations_long.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 824679,
+    "description": "Every species entry, one row per quadrat \u00d7 species",
+    "href": "../veg_observations_long.csv",
+    "meta": "2,243 rows \u00b7 12 cols \u00b7 805.4 KB"
+  },
+  {
+    "path": "outputs/veg_qa_flags.csv",
+    "name": "veg_qa_flags.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 84432,
+    "description": "Quality-assurance flags with rule, severity and record",
+    "href": "../veg_qa_flags.csv",
+    "meta": "307 rows \u00b7 10 cols \u00b7 82.5 KB"
+  },
+  {
+    "path": "outputs/vegetation_rule_catalogue.csv",
+    "name": "vegetation_rule_catalogue.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 3649,
+    "description": "QA rules with severity, basis and rule version",
+    "href": "../vegetation_rule_catalogue.csv",
+    "meta": "29 rows \u00b7 7 cols \u00b7 3.6 KB"
+  },
+  {
+    "path": "outputs/vegetation_qa_parameters.json",
+    "name": "vegetation_qa_parameters.json",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "JSON",
+    "size_bytes": 325,
+    "description": "Tolerances used by the QA rules",
+    "href": "../vegetation_qa_parameters.json",
+    "meta": "9 fields \u00b7 325 B"
+  },
+  {
+    "path": "outputs/vegetation_integrity_checks.csv",
+    "name": "vegetation_integrity_checks.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 573,
+    "description": "Join and key integrity checks",
+    "href": "../vegetation_integrity_checks.csv",
+    "meta": "13 rows \u00b7 3 cols \u00b7 573 B"
+  },
+  {
+    "path": "outputs/vegetation_form_calculation_audit.csv",
+    "name": "vegetation_form_calculation_audit.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 2468,
+    "description": "Stored ODK quadrat counts against recomputed counts",
+    "href": "../vegetation_form_calculation_audit.csv",
+    "meta": "32 rows \u00b7 6 cols \u00b7 2.4 KB"
+  },
+  {
+    "path": "outputs/vegetation_species_derivation_mismatches.csv",
+    "name": "vegetation_species_derivation_mismatches.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 29,
+    "description": "Species-display reconstruction mismatches (empty means all match)",
+    "href": "../vegetation_species_derivation_mismatches.csv",
+    "meta": "0 rows \u00b7 4 cols \u00b7 29 B"
+  },
+  {
+    "path": "outputs/vegetation_form_catalogue.csv",
+    "name": "vegetation_form_catalogue.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 24641,
+    "description": "ODK form fields with constraints and calculations",
+    "href": "../vegetation_form_catalogue.csv",
+    "meta": "173 rows \u00b7 8 cols \u00b7 24.1 KB"
+  },
+  {
+    "path": "outputs/vegetation_plot_coverage.csv",
+    "name": "vegetation_plot_coverage.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 4121,
+    "description": "Planned centroids against registered and surveyed plots",
+    "href": "../vegetation_plot_coverage.csv",
+    "meta": "51 rows \u00b7 8 cols \u00b7 4.0 KB"
+  },
+  {
+    "path": "outputs/vegetation_project_patterns.csv",
+    "name": "vegetation_project_patterns.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 418,
+    "description": "Project-wide patterns with denominators",
+    "href": "../vegetation_project_patterns.csv",
+    "meta": "3 rows \u00b7 5 cols \u00b7 418 B"
+  },
+  {
+    "path": "outputs/vegetation_findings.json",
+    "name": "vegetation_findings.json",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "JSON",
+    "size_bytes": 440,
+    "description": "Machine-readable headline numbers behind the vegetation report",
+    "href": "../vegetation_findings.json",
+    "meta": "13 fields \u00b7 440 B"
+  },
+  {
+    "path": "outputs/vegetation_transect_geometry.csv",
+    "name": "vegetation_transect_geometry.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 8064,
+    "description": "Transect orientation, length, midpoint shift and endpoints",
+    "href": "../vegetation_transect_geometry.csv",
+    "meta": "31 rows \u00b7 17 cols \u00b7 7.9 KB"
+  },
+  {
+    "path": "outputs/vegetation_spatial_rollup.csv",
+    "name": "vegetation_spatial_rollup.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 3193,
+    "description": "Quadrat distances from the registered line per submission",
+    "href": "../vegetation_spatial_rollup.csv",
+    "meta": "32 rows \u00b7 8 cols \u00b7 3.1 KB"
+  },
+  {
+    "path": "outputs/transects.geojson",
+    "name": "transects.geojson",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "GEO",
+    "size_bytes": 16728,
+    "description": "Transect lines as GeoJSON for GIS tools",
+    "href": "../transects.geojson",
+    "meta": "30 features \u00b7 16.3 KB"
+  },
+  {
+    "path": "outputs/transect_map.html",
+    "name": "transect_map.html",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "HTML",
+    "size_bytes": 1343537,
+    "description": "Interactive transect review map (basemap needs internet)",
+    "href": "../transect_map.html",
+    "meta": "1.3 MB"
+  },
+  {
+    "path": "outputs/figures/A2_prediction_eda.png",
+    "name": "A2_prediction_eda.png",
+    "category": "figures",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "PNG",
+    "size_bytes": 76397,
+    "description": "Prediction confidence by species",
+    "href": "../figures/A2_prediction_eda.png",
+    "meta": "74.6 KB"
+  },
+  {
+    "path": "outputs/figures/A3_validation_outcomes.png",
+    "name": "A3_validation_outcomes.png",
+    "category": "figures",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "PNG",
+    "size_bytes": 80108,
+    "description": "Expert outcome against BirdNET confidence",
+    "href": "../figures/A3_validation_outcomes.png",
+    "meta": "78.2 KB"
+  },
+  {
+    "path": "outputs/figures/A5_baseline_fits.png",
+    "name": "A5_baseline_fits.png",
+    "category": "figures",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "PNG",
+    "size_bytes": 79599,
+    "description": "Logistic baseline fits",
+    "href": "../figures/A5_baseline_fits.png",
+    "meta": "77.7 KB"
+  },
+  {
+    "path": "outputs/figures/A7_probability_intervals.png",
+    "name": "A7_probability_intervals.png",
+    "category": "figures",
+    "tags": [
+      "birdnet"
+    ],
+    "type": "PNG",
+    "size_bytes": 78356,
+    "description": "Probability-correct intervals",
+    "href": "../figures/A7_probability_intervals.png",
+    "meta": "76.5 KB"
+  },
+  {
+    "path": "outputs/figures/B3_quadrat_eda.png",
+    "name": "B3_quadrat_eda.png",
+    "category": "figures",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "PNG",
+    "size_bytes": 25999,
+    "description": "Quadrats per submission",
+    "href": "../figures/B3_quadrat_eda.png",
+    "meta": "25.4 KB"
+  },
+  {
+    "path": "outputs/figures/B9_sampling_effort.png",
+    "name": "B9_sampling_effort.png",
+    "category": "figures",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "PNG",
+    "size_bytes": 121641,
+    "description": "Sampling effort and species accumulation",
+    "href": "../figures/B9_sampling_effort.png",
+    "meta": "118.8 KB"
+  },
+  {
+    "path": "outputs/figures/B9_transect_map.png",
+    "name": "B9_transect_map.png",
+    "category": "figures",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "PNG",
+    "size_bytes": 50585,
+    "description": "Static map of plots by status",
+    "href": "../figures/B9_transect_map.png",
+    "meta": "49.4 KB"
+  },
+  {
+    "path": "reports/bird_analysis.md",
+    "name": "bird_analysis.md",
+    "category": "figures",
+    "tags": [
+      "birdnet",
+      "methods"
+    ],
+    "type": "MD",
+    "size_bytes": 7071,
+    "description": "Bird findings for Natural State",
+    "href": "../../reports/bird_analysis.md",
+    "meta": "60 lines \u00b7 6.9 KB"
+  },
+  {
+    "path": "reports/bird_tech_handover.md",
+    "name": "bird_tech_handover.md",
+    "category": "figures",
+    "tags": [
+      "birdnet",
+      "methods"
+    ],
+    "type": "MD",
+    "size_bytes": 3717,
+    "description": "Bird technical handover",
+    "href": "../../reports/bird_tech_handover.md",
+    "meta": "45 lines \u00b7 3.6 KB"
+  },
+  {
+    "path": "reports/vegetation_quality_report.md",
+    "name": "vegetation_quality_report.md",
+    "category": "figures",
+    "tags": [
+      "methods",
+      "vegetation"
+    ],
+    "type": "MD",
+    "size_bytes": 5444,
+    "description": "Vegetation findings for Natural State",
+    "href": "../../reports/vegetation_quality_report.md",
+    "meta": "50 lines \u00b7 5.3 KB"
+  },
+  {
+    "path": "reports/vegetation_tech_handover.md",
+    "name": "vegetation_tech_handover.md",
+    "category": "figures",
+    "tags": [
+      "methods",
+      "vegetation"
+    ],
+    "type": "MD",
+    "size_bytes": 5947,
+    "description": "Vegetation technical handover, including the dashboard",
+    "href": "../../reports/vegetation_tech_handover.md",
+    "meta": "60 lines \u00b7 5.8 KB"
+  },
+  {
+    "path": "reports/decision_log.md",
+    "name": "decision_log.md",
+    "category": "figures",
+    "tags": [
+      "methods"
+    ],
+    "type": "MD",
+    "size_bytes": 2386,
+    "description": "Analysis decisions and their reasons",
+    "href": "../../reports/decision_log.md",
+    "meta": "20 lines \u00b7 2.3 KB"
+  },
+  {
+    "path": "reports/validation_notes.md",
+    "name": "validation_notes.md",
+    "category": "figures",
+    "tags": [
+      "methods"
+    ],
+    "type": "MD",
+    "size_bytes": 4061,
+    "description": "How the analysis was executed and verified",
+    "href": "../../reports/validation_notes.md",
+    "meta": "33 lines \u00b7 4.0 KB"
+  },
+  {
+    "path": "README.md",
+    "name": "README.md",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "MD",
+    "size_bytes": 9557,
+    "description": "Overview, setup and reading order",
+    "href": "../../README.md",
+    "meta": "145 lines \u00b7 9.3 KB"
+  },
+  {
+    "path": "requirements.txt",
+    "name": "requirements.txt",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "TXT",
+    "size_bytes": 208,
+    "description": "Python package ranges",
+    "href": "../../requirements.txt",
+    "meta": "13 lines \u00b7 208 B"
+  },
+  {
+    "path": "environment_tested.json",
+    "name": "environment_tested.json",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "JSON",
+    "size_bytes": 1031,
+    "description": "Package versions of the recorded test run",
+    "href": "../../environment_tested.json",
+    "meta": "12 fields \u00b7 1.0 KB"
+  },
+  {
+    "path": "pytest.ini",
+    "name": "pytest.ini",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "INI",
+    "size_bytes": 42,
+    "description": "Test configuration",
+    "href": "../../pytest.ini",
+    "meta": "4 lines \u00b7 42 B"
+  },
+  {
+    "path": "src/birds.py",
+    "name": "birds.py",
+    "category": "config",
+    "tags": [
+      "birdnet",
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 15453,
+    "description": "Calibration, labelling and validation functions",
+    "href": "../../src/birds.py",
+    "meta": "287 lines \u00b7 15.1 KB"
+  },
+  {
+    "path": "src/vegetation.py",
+    "name": "vegetation.py",
+    "category": "config",
+    "tags": [
+      "methods",
+      "vegetation"
+    ],
+    "type": "PY",
+    "size_bytes": 16110,
+    "description": "Transect geometry, QA flags and accumulation functions",
+    "href": "../../src/vegetation.py",
+    "meta": "223 lines \u00b7 15.7 KB"
+  },
+  {
+    "path": "src/common.py",
+    "name": "common.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 1596,
+    "description": "Input loading, fingerprints and evidence export",
+    "href": "../../src/common.py",
+    "meta": "40 lines \u00b7 1.6 KB"
+  },
+  {
+    "path": "src/transect_map.py",
+    "name": "transect_map.py",
+    "category": "config",
+    "tags": [
+      "methods",
+      "vegetation"
+    ],
+    "type": "PY",
+    "size_bytes": 38938,
+    "description": "Interactive transect map and the shared review-priority rule",
+    "href": "../../src/transect_map.py",
+    "meta": "647 lines \u00b7 38.0 KB"
+  },
+  {
+    "path": "src/dashboard.py",
+    "name": "dashboard.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 45481,
+    "description": "Builds the Overview, Birds and Vegetation pages",
+    "href": "../../src/dashboard.py",
+    "meta": "698 lines \u00b7 44.4 KB"
+  },
+  {
+    "path": "src/dashboard_charts.py",
+    "name": "dashboard_charts.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 13437,
+    "description": "Hand-built SVG charts for the dashboard",
+    "href": "../../src/dashboard_charts.py",
+    "meta": "214 lines \u00b7 13.1 KB"
+  },
+  {
+    "path": "src/dashboard_files.py",
+    "name": "dashboard_files.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 27883,
+    "description": "Builds this Files page, the manifest and the outputs ZIP",
+    "href": "../../src/dashboard_files.py",
+    "meta": "425 lines \u00b7 27.2 KB"
+  },
+  {
+    "path": "src/dashboard_assets/dashboard.css",
+    "name": "dashboard.css",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "CSS",
+    "size_bytes": 26940,
+    "description": "Dashboard styles",
+    "href": "../../src/dashboard_assets/dashboard.css",
+    "meta": "364 lines \u00b7 26.3 KB"
+  },
+  {
+    "path": "src/dashboard_assets/dashboard.js",
+    "name": "dashboard.js",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "JS",
+    "size_bytes": 11434,
+    "description": "Dashboard behaviour: sorting, filters, previews",
+    "href": "../../src/dashboard_assets/dashboard.js",
+    "meta": "232 lines \u00b7 11.2 KB"
+  },
+  {
+    "path": "tests/test_analysis_policy.py",
+    "name": "test_analysis_policy.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 4438,
+    "description": "Regression tests for the analysis policy",
+    "href": "../../tests/test_analysis_policy.py",
+    "meta": "91 lines \u00b7 4.3 KB"
+  },
+  {
+    "path": "tests/test_dashboard.py",
+    "name": "test_dashboard.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 8380,
+    "description": "Checks for the dashboard pages and file links",
+    "href": "../../tests/test_dashboard.py",
+    "meta": "170 lines \u00b7 8.2 KB"
+  },
+  {
+    "path": "src/__init__.py",
+    "name": "__init__.py",
+    "category": "config",
+    "tags": [
+      "methods"
+    ],
+    "type": "PY",
+    "size_bytes": 68,
+    "description": "",
+    "href": "../../src/__init__.py",
+    "meta": "2 lines \u00b7 68 B"
+  }
+]

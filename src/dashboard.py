@@ -1,97 +1,45 @@
 """Static four-page results dashboard built from the notebooks' exported outputs.
 
-Writes outputs/dashboard/index.html (overview), birds.html, vegetation.html and
-files.html. Every number is read at build time from outputs/ plus two raw
-reference tables (validation clips, planned centroids); nothing is recomputed
-beyond counting and formatting. Pages are self-contained (inline CSS, JS and
-SVG) and work offline, opened straight from disk.
+Writes outputs/dashboard/index.html (overview), birds.html, vegetation.html and files.html
+(the last via src/dashboard_files.py). Every number is read at build time from outputs/ plus
+three raw reference tables (validation clips, planned centroids, survey dates); nothing is
+recomputed beyond counting and formatting. Pages are self-contained (inline CSS, JS and SVG)
+and work offline, opened straight from disk. Images live in outputs/dashboard/assets/.
 
 Run after the notebooks:  python -m src.dashboard
 """
 from __future__ import annotations
 
-import html
-import json
 import math
 from pathlib import Path
-from urllib.parse import quote
 
+import json
 import numpy as np
 import pandas as pd
 
 from src.dashboard_charts import (COLOUR, FUNNEL_KEY, PRIORITY_ORDER, SEVERITY_STATUS, calibration_svg, effort_svg,
                                   esc, funnel, ic, map_legend, plot_map_svg, rule_bars, short_plot as _short, swatch)
+from src.dashboard_files import files_page
 from src.transect_map import STATUS, priority_rules, transect_priorities
 
 ASSETS = Path(__file__).with_name("dashboard_assets")
 
-# thresholds.status -> (status colour key, decision label)
+# thresholds.status -> (status colour key, decision label, chip icon)
 BIRD_DECISIONS = {
-    "supported_exploratory_fit": ("good", "Released"),
-    "pending_review_sparse_errors": ("warning", "Held for review"),
-    "unsupported_fit": ("info", "Not estimable"),
-    "unsupported_target_outside_validation_range": ("info", "Target out of range"),
+    "supported_exploratory_fit": ("good", "Released", "✓"),
+    "pending_review_sparse_errors": ("warning", "Held for review", "!"),
+    "unsupported_fit": ("info", "Not estimable", "–"),
+    "unsupported_target_outside_validation_range": ("critical", "Out of range", "!"),
 }
+# Illustrations only (outputs/dashboard/assets/); not evidence of identification.
+BIRD_IMAGES = {"Abyssinian Nightjar": "nightjar.png", "Three-banded Plover": "plover.png",
+               "African Black-headed Oriole": "oriole.png", "Red-billed Firefinch": "firefinch.png"}
 BIRD_FILES = ["bird_thresholds.csv", "bird_label_summary.csv", "bird_validation_metrics.csv",
               "bird_checked_cutoff_evidence.csv", "bird_bin_weighted_precision.csv",
               "bird_firth_sensitivity.csv", "bird_validation_link_audit.csv", "birdnet_predictions_labelled.csv"]
 VEG_FILES = ["veg_plot_summary.csv", "veg_qa_flags.csv", "veg_sampling_effort.csv", "veg_survey_summary.csv",
              "vegetation_transect_geometry.csv", "vegetation_plot_coverage.csv", "vegetation_project_patterns.csv",
              "vegetation_rule_catalogue.csv", "vegetation_qa_parameters.json"]
-
-# ---------------------------------------------------------------------------- Files page catalogue
-FILE_GROUPS = {
-    "bird": ("Birds · labels", "BirdNET predictions turned into observations"),
-    "bval": ("Birds · validation & sensitivity", "Evidence behind each threshold"),
-    "veg": ("Vegetation · results", "Survey, plot and effort summaries"),
-    "vqa": ("Vegetation · QA & audit", "Flags, rules and checks against the ODK forms"),
-    "geo": ("Vegetation · transect geometry", "Positions as recorded, never corrected"),
-    "maps": ("Maps", "Interactive review map and spatial interchange"),
-    "figures": ("Figures", "Static charts saved by the notebooks"),
-    "other": ("Other outputs", "Files without a description yet"),
-}
-FILE_DESCRIPTIONS = {
-    "birdnet_predictions_labelled.csv": ("bird", "All BirdNET predictions with fitted threshold, probability correct and observation label."),
-    "bird_label_summary.csv": ("bird", "Per species: predictions, fitted candidates, observations and rows sent for review."),
-    "bird_thresholds.csv": ("bird", "Per-species logistic fit of correctness on confidence, and the resulting threshold."),
-    "bird_findings.json": ("bird", "Machine-readable headline numbers behind the bird report."),
-    "bird_validation_metrics.csv": ("bval", "Checked-sample precision per species with Wilson 95% interval."),
-    "bird_validation_score_bins.csv": ("bval", "Validation sample by confidence bin, with prediction counts and weights."),
-    "bird_bin_weighted_precision.csv": ("bval", "Precision re-weighted to the full prediction distribution, with missing-bin scenarios."),
-    "bird_checked_cutoff_evidence.csv": ("bval", "Precision and one-sided 95% lower bound at each candidate cutoff."),
-    "bird_raw_cutoff_diagnostic.csv": ("bval", "Checked precision and predictions retained at raw score cutoffs."),
-    "bird_clipping_sensitivity.csv": ("bval", "How the score cutoff moves with the probability clipping epsilon."),
-    "bird_firth_sensitivity.csv": ("bval", "Firth-penalised logistic fits as a check on separation."),
-    "bird_validation_link_audit.csv": ("bval", "How many predictions each validation row matched."),
-    "veg_survey_summary.csv": ("veg", "Survey-level headline counts: submissions, plots, quadrats, taxa and flag totals."),
-    "veg_plot_summary.csv": ("veg", "One row per submission: quadrats, provisional richness and flag counts."),
-    "veg_sampling_effort.csv": ("veg", "Species accumulation per plot: expected new taxa from further quadrats and an effort verdict."),
-    "veg_observations_long.csv": ("veg", "Every species entry, one row per quadrat × species, with its source and analysis inclusion."),
-    "vegetation_plot_coverage.csv": ("veg", "Planned centroids against registered and surveyed plots, with viability and rejections."),
-    "vegetation_project_patterns.csv": ("veg", "Project-wide patterns, with affected records, denominator and interpretation."),
-    "vegetation_findings.json": ("veg", "Machine-readable headline numbers behind the vegetation report."),
-    "veg_qa_flags.csv": ("vqa", "Every QA flag: rule, severity, affected record, field, value and message."),
-    "vegetation_rule_catalogue.csv": ("vqa", "The QA rules with severity, basis (SOP or analyst tolerance) and rule version."),
-    "vegetation_qa_parameters.json": ("vqa", "Tolerances used by the QA rules: quadrat count, GPS accuracy, transect length, bearing."),
-    "vegetation_integrity_checks.csv": ("vqa", "Join and key integrity checks with the number of problem rows."),
-    "vegetation_form_calculation_audit.csv": ("vqa", "Quadrat counts stored by the ODK form compared with recomputed counts."),
-    "vegetation_species_derivation_mismatches.csv": ("vqa", "Quadrats whose species display differs from the tidy reconstruction. Empty means all match."),
-    "vegetation_form_catalogue.csv": ("vqa", "ODK form fields with type, constraints, relevance and calculations."),
-    "vegetation_transect_geometry.csv": ("geo", "Recorded transect start, midpoint and end, with length, bearing and midpoint offset."),
-    "vegetation_spatial_rollup.csv": ("geo", "Per-submission quadrat distances from the registered line and the share flagged."),
-    "transect_map.html": ("maps", "Interactive transect review map. Basemap tiles need internet."),
-    "transects.geojson": ("maps", "Transect lines as GeoJSON, ready for QGIS or any web map."),
-    "figures/A2_prediction_eda.png": ("figures", "Prediction confidence by species"),
-    "figures/A3_validation_outcomes.png": ("figures", "Validation outcomes"),
-    "figures/A5_baseline_fits.png": ("figures", "Logistic baseline fits"),
-    "figures/A7_probability_intervals.png": ("figures", "Probability-correct intervals"),
-    "figures/B3_quadrat_eda.png": ("figures", "Quadrats per submission"),
-    "figures/B9_sampling_effort.png": ("figures", "Sampling effort & accumulation"),
-    "figures/B9_transect_map.png": ("figures", "Transect map (static)"),
-}
-PREVIEW_ROWS = 15
-PREVIEW_JSON_CHARS = 3000
-PREVIEW_CELL_CHARS = 120
 
 
 # ---------------------------------------------------------------------------- small helpers
@@ -128,20 +76,13 @@ def _num(x, fmt=".3f", none="—") -> str:
     return none if pd.isna(x) else format(x, fmt)
 
 
-def _size(n: int) -> str:
-    for unit in ("B", "KB", "MB"):
-        if n < 1024 or unit == "MB":
-            return f"{n} B" if unit == "B" else f"{n:.1f} {unit}"
-        n /= 1024
-
-
 def chip(status: str, label: str, icon: str | None = None) -> str:
-    return f'<span class="chip">{ic(status, icon)}{esc(label)}</span>'
+    return f'<span class="chip c-{status}">{ic(status, icon)}{esc(label)}</span>'
 
 
-def kpi(value: str, label: str, sub: str = "") -> str:
+def kpi(value: str, label: str, sub: str = "", green: bool = False) -> str:
     sub_html = f'<div class="ks">{sub}</div>' if sub else ""
-    return f'<div class="kpi"><div class="kv">{value}</div><div class="kl">{label}</div>{sub_html}</div>'
+    return f'<div class="kpi"><div class="kv{" green" if green else ""}">{value}</div><div class="kl">{label}</div>{sub_html}</div>'
 
 
 def of(n, d) -> str:
@@ -149,12 +90,18 @@ def of(n, d) -> str:
 
 
 def source(*files: str) -> str:
-    return '<div class="src">Source: ' + ", ".join(f"<code>{f}</code>" for f in files) + "</div>"
+    return '<div class="src">Source: ' + " · ".join(f"<code>{f}</code>" for f in files) + "</div>"
 
 
-def card(title: str, sub: str, body: str, sources: tuple = (), cls: str = "card") -> str:
+def card(title: str, sub: str, body: str, sources: tuple = (), pill: str = "", anchor: str = "", cls: str = "card") -> str:
     sub_html = f'<div class="cs">{sub}</div>' if sub else ""
-    return f'<section class="{cls}"><h2>{title}</h2>{sub_html}{body}{source(*sources) if sources else ""}</section>'
+    id_attr = f' id="{anchor}"' if anchor else ""
+    return (f'<section class="{cls}"{id_attr}><div class="ch"><div><h2>{title}</h2>{sub_html}</div>{pill}</div>'
+            f'{body}{source(*sources) if sources else ""}</section>')
+
+
+def pill(text: str, tone: str = "") -> str:
+    return f'<span class="pill {tone}">{esc(text)}</span>'
 
 
 def findings(items: list[tuple]) -> str:
@@ -178,6 +125,25 @@ def sortable_table(headers: list[tuple[str, bool]], rows: list[str], table_id: s
 def td(display, sort_value=None, numeric=True) -> str:
     v = "" if sort_value is None or pd.isna(sort_value) else f' data-v="{sort_value}"'
     return f'<td{" class=n" if numeric else ""}{v}>{display}</td>'
+
+
+def hero(eyebrow: str, title: str, sub: str, aside: str = "") -> str:
+    """Page header with the landscape banner (set as --hero-img on <body>)."""
+    return (f'<section class="hero"><div class="hero-text"><div class="eyebrow">{eyebrow}</div><h1>{title}</h1>'
+            f'<p class="sub">{sub}</p></div>{aside}</section>')
+
+
+def survey_dates(root: Path) -> str:
+    """'19–27 May 2026' from the raw survey start times, or '' when unavailable."""
+    path = root / "data" / "raw" / "herbaceous_veg_survey.csv"
+    try:
+        t = pd.to_datetime(pd.read_csv(path, usecols=["survey_begin-start_time"])["survey_begin-start_time"].str[:10])
+    except (OSError, ValueError, KeyError):
+        return ""
+    a, b = t.min(), t.max()
+    if a.month == b.month and a.year == b.year:
+        return f"{a.day}–{b.day} {b:%B %Y}" if a.day != b.day else f"{b.day} {b:%B %Y}"
+    return f"{a.day} {a:%b} – {b.day} {b:%b %Y}"
 
 
 # ---------------------------------------------------------------------------- loading
@@ -210,7 +176,7 @@ def _species_reason(sp: str, t, firth_cut, val) -> str:
         moves = f"; cutoff moves {t.conf_threshold:.3f} → {firth_cut:.3f} under Firth" if pd.notna(firth_cut) else ""
         return f"{n_wrong} error{_s(n_wrong)}{at}{moves}."
     if t.status == "unsupported_fit" and n_wrong == 0:
-        return f"{int(t.n_correct)} of {int(t.n)} checks correct: one outcome class, so no score relationship can be fitted."
+        return "Every check was correct: one outcome class, so no score relationship can be fitted."
     if t.status == "unsupported_target_outside_validation_range":
         return (f"Fitted {t.target_p:g} cutoff ({t.conf_threshold:.3f}) lies above the highest checked score "
                 f"({t.validation_score_max:.3f}).")
@@ -220,14 +186,14 @@ def _species_reason(sp: str, t, firth_cut, val) -> str:
 def _species_decisions(b: dict) -> list[dict]:
     rows = []
     for sp, t in b["thr"].iterrows():
-        key, label = BIRD_DECISIONS.get(t.status, ("info", t.status.replace("_", " ")))
+        key, label, icon = BIRD_DECISIONS.get(t.status, ("info", t.status.replace("_", " "), "–"))
         lab = b["labels"].loc[sp]
         firth_cut = b["firth"].at[sp, "firth_conf_threshold"] if sp in b["firth"].index else np.nan
-        rows.append({"name": sp, "short": sp.split()[-1], "key": key, "label": label, "t": t, "firth": firth_cut,
+        rows.append({"name": sp, "short": sp.split()[-1], "key": key, "label": label, "icon": icon, "t": t, "firth": firth_cut,
                      "checked": int(b["metrics"].at[sp, "checked"]), "correct": int(b["metrics"].at[sp, "correct"]),
                      "preds": int(lab.predictions), "cands": int(lab.fitted_candidates), "obs": int(lab.observations),
                      "reason": _species_reason(sp, t, firth_cut, b["val"])})
-    rank = {"good": 0, "warning": 1, "info": 2}
+    rank = {"good": 0, "warning": 1, "info": 2, "critical": 3}
     return sorted(rows, key=lambda r: (rank[r["key"]], -r["preds"]))
 
 
@@ -239,7 +205,7 @@ def bird_numbers(b: dict) -> dict:
         "n_checked": int(b["metrics"].checked.sum()), "n_links": len(links),
         "unique_links": int((links.candidate_matches == 1).sum()), "n_recorders": int(b["pred"].folder.nunique()),
         "released": [s for s in sp if s["key"] == "good"], "held": [s for s in sp if s["key"] == "warning"],
-        "other": [s for s in sp if s["key"] == "info"], "target": target,
+        "other": [s for s in sp if s["key"] in ("info", "critical")], "target": target,
         "sensitivity": float(thr.sensitivity_assumed.iloc[0]), "model": thr.model_version.iloc[0],
         "policy": thr.policy_version.iloc[0], "recall_known": bool(b["metrics"].recall.notna().any()),
         "birdnet": None if b["val"] is None else b["val"].vBirdNET.iloc[0],
@@ -299,117 +265,157 @@ def _veg_numbers(v: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------- pages
-def overview_page(b: dict | None, v: dict | None) -> str:
-    bird_card = notice("01", "bird")
+def _bird_findings(nb: dict) -> list[tuple]:
+    items = [("good", f'<b>{esc(s["name"])}:</b> released at cutoff {s["t"].conf_threshold:.3f} ({s["obs"]:,} observations).')
+             for s in nb["released"]]
+    items += [("warning", f'<b>{esc(s["name"])}:</b> {s["cands"]:,} fitted candidates held for expert review '
+                          f'({int(s["t"].n_wrong)} expert error{_s(int(s["t"].n_wrong))}).') for s in nb["held"]]
+    if nb["other"]:
+        items.append((("info", "–"), f'<b>{_and([s["short"] for s in nb["other"]])}:</b> the requested model cannot '
+                                     f'support a {nb["target"]:g} cutoff.'))
+    return items
+
+
+def _veg_findings(v: dict) -> list[tuple]:
+    qa = v["qa"]
+    items = []
+    if v["complete"]:
+        items.append(("good", f'All {v["n_analysed"]} analysed submissions record {qa["expected_quadrats"]} quadrats; '
+                              f'{"only " if v["errors"] == 1 else ""}{v["errors"]} record error{_s(v["errors"])}.'))
+    if v["critical"]:
+        items.append((("critical", "!"), f'<b>Plots {_and([_short(p) for p in v["critical"]])}:</b> '
+                                         f'{priority_rules(qa)["critical"]}.'))
+    tail = (f'; {len(v["never_registered"])} primaries ({_plot_range(v["never_registered"])}) lack registration'
+            if v["never_registered"] else "")
+    items.append(("warning", f'{_all_of(v["rotated"], v["n_viable"]).capitalize()} transects trend {v["direction"]}'
+                             f' (median {v["bearing"]:.0f}°){tail}.'))
+    return items
+
+
+def overview_page(b: dict | None, v: dict | None, dates: str) -> str:
+    badge = ('<div class="hero-badge"><i class="ic s-good" aria-hidden="true">✓</i><div><b>Analysis complete</b>'
+             'Results regenerated from notebooks 01–02</div></div>' if b and v else
+             '<div class="hero-badge"><i class="ic s-warning" aria-hidden="true">!</i><div><b>Outputs missing</b>'
+             'Run notebooks 01 and 02, then rebuild</div></div>')
+    head = hero("Research &amp; monitoring / Results overview", "What the data support, and what needs review",
+                "Two independent analyses. Clear decisions, supporting evidence, and a transparent queue of questions "
+                "to resolve.", badge)
+    diamond = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 15 8 8 15 1 8z" fill="{c}"/></svg>'
+    bird_body = notice("01", "bird")
     if b:
         nb = bird_numbers(b)
-        items = [("good", f'{s["short"]} released: cutoff {s["t"].conf_threshold:.3f}, {s["obs"]:,} observations.') for s in nb["released"]]
-        items += [("warning", f'{s["short"]} held: {s["cands"]:,} fitted candidates rest on {int(s["t"].n_wrong)} '
-                              f'expert error{_s(int(s["t"].n_wrong))}.') for s in nb["held"]]
-        if nb["other"]:
-            items.append((("info", "–"), f'{_and([s["short"] for s in nb["other"]])}: the requested model cannot support a '
-                                          f'{nb["target"]:g} cutoff.'))
-        bird_card = (
-            f'<div class="q">Which BirdNET predictions count as observations at fitted P(correct) ≥ {nb["target"]:g}?</div>'
-            f'<div class="kpis mini">{kpi(f"{nb['n_pred']:,}", "predictions")}{kpi(f"{nb['n_obs']:,}", "observations")}'
-            f'{kpi(of(len(nb["released"]), len(b["species"])), "species released")}</div>{findings(items)}'
-            f'<div class="cs">{FUNNEL_KEY}</div>{funnel(b["species"])}'
+        bird_body = (
+            f'<div class="q">Which predictions count as observations?</div>'
+            f'<div class="cs">Decision at fitted P(correct) ≥ {nb["target"]:g}, subject to the evidence policy</div>'
+            f'<div class="kpis mini">{kpi(f"{nb['n_pred']:,}", "predictions")}'
+            f'{kpi(f"{nb['n_obs']:,}", "released observations", green=True)}'
+            f'{kpi(of(len(nb["released"]), len(b["species"])), "species released")}</div>{findings(_bird_findings(nb))}'
+            f'<div class="divider"></div><div class="cs" style="margin:0">{FUNNEL_KEY}</div>{funnel(b["species"])}'
             f'<div class="limits"><span><b>{nb["unique_links"]}/{nb["n_links"]}</b>checks link uniquely to a prediction</span>'
             f'<span><b>Recall</b>{"reported" if nb["recall_known"] else "unavailable"}</span>'
             f'<span><b>{nb["target"]:.0%}</b>fitted, not certified</span></div>'
             f'{source("bird_label_summary.csv", "bird_thresholds.csv", "bird_validation_link_audit.csv")}'
-            f'<div class="actions"><a class="btn primary" href="birds.html">Open birds page →</a></div>')
-    veg_card = notice("02", "vegetation")
+            f'<div class="actions"><a class="btn outline" href="birds.html">View BirdNET evidence →</a></div>')
+    bird_pill = pill(f'{len(nb["released"])} species released') if b else ""
+    veg_body = notice("02", "vegetation")
     if v:
-        items = [("warning", f'{_all_of(v["rotated"], v["n_viable"]).capitalize()} transects run '
-                             f'roughly {v["direction"]} (median {v["bearing"]:.0f}°), not north–south.')]
-        if v["critical"]:
-            items.append(("critical", f'Plots {_and([_short(p) for p in v["critical"]])}: '
-                                      f'{priority_rules(v["qa"])["critical"]}.'))
-        if v["never_registered"]:
-            items.append(("warning", f'{len(v["never_registered"])} primary plots ({_plot_range(v["never_registered"])}) '
-                                     f"were never registered."))
-        veg_card = (
-            '<div class="q">Are the herbaceous survey records fit for analysis, and what must be reviewed first?</div>'
+        c = v["counts"]
+        veg_body = (
+            '<div class="q">Are survey records fit for analysis?</div>'
+            f'<div class="cs">{"Yes, with targeted spatial and metadata review first" if v["complete"] else "Partly: see the gaps below"}</div>'
             f'<div class="kpis mini">{kpi(of(v["n_analysed"], v["n_sub"]), "submissions analysed")}'
-            f'{kpi(of(v["primary_surveyed"], v["n_primary"]), "primaries surveyed")}'
-            f'{kpi(f"{v['errors']} · {v['warnings']}", "errors · warnings")}</div>{findings(items)}'
-            f'<div class="mapwrap">{_veg_map(v)}</div>{map_legend(v["counts"], len(v["never_registered"]), len(v["nonviable"]))}'
+            f'{kpi(of(v["primary_surveyed"], v["n_primary"]), "primary plots surveyed")}'
+            f'{kpi(of(v["off_line"], v["n_quadrats"]), "quadrats off line")}</div>{findings(_veg_findings(v))}'
+            f'<div class="divider"></div><div class="mini-h"><h3>Spatial review priorities</h3><span>'
+            + " · ".join(f'{c.get(k, 0)} {k}' for k in ("critical", "serious", "warning")) + '</span></div>'
+            f'<div class="mapwrap">{_veg_map(v)}</div>'
+            f'{map_legend(v["counts"], len(v["never_registered"]), len(v["nonviable"]))}'
             f'{source("vegetation_transect_geometry.csv", "veg_plot_summary.csv", "vegetation_plot_coverage.csv")}'
-            f'<div class="actions"><a class="btn primary" href="vegetation.html">Open vegetation page →</a>'
+            f'<div class="actions"><a class="btn outline" href="vegetation.html">View vegetation review →</a>'
             f'<a class="btn ghost" href="../transect_map.html">Interactive map</a></div>')
+    veg_pill = pill("Review required", "amber") if v else ""
 
     questions = []
     if b:
         questions += [("Birds", f'Was the {nb["n_links"]}-clip validation sample drawn from this prediction file? '
                                 f'Only {nb["unique_links"]} clips link uniquely.'),
-                      ("Birds", "How should species with no expert errors, or very few, be handled?"),
-                      ("Birds", f'Which BirdNET sensitivity setting produced these scores? {nb["sensitivity"]:.1f} is assumed.')]
+                      ("Birds", "How should species with zero or very few expert errors be handled?"),
+                      ("Birds", f'Which BirdNET sensitivity setting generated the scores? {nb["sensitivity"]:.1f} is assumed.')]
     if v:
-        questions.append(("Vegetation", f'Are transects laid {v["direction"]} in practice, or were endpoints captured wrongly?'))
+        questions.append(("Vegetation", f'Were transects truly laid {v["direction"]}, or were endpoints captured incorrectly?'))
         calc = v["patterns"][v["patterns"].finding.str.startswith("Stored calculation")]
         if len(calc):
-            questions.append(("Vegetation", f"Why does the stored 'quadrats with species' count differ from the form's formula "
-                                            f"in {int(calc.affected_records.iloc[0])} of {int(calc.denominator.iloc[0])} submissions?"))
+            questions.append(("Vegetation", f"Why does the stored species-quadrat count differ from the reconstruction in "
+                                            f"{int(calc.affected_records.iloc[0])} of {int(calc.denominator.iloc[0])} submissions?"))
         if v["nonviable"] and v["never_registered"]:
             backup = f'backup Plot {_plot_range(v["backups_used"])}' if v["backups_used"] else "a backup plot"
-            questions.append(("Vegetation", f'Did {backup} replace non-viable Plot {_plot_range(v["nonviable"])}, and why were '
-                                            f'primaries {_plot_range(v["never_registered"])} not registered?'))
-    q_html = "".join(f'<li><span class="tag tag-{a.lower()}">{a}</span>{esc(q)}</li>' for a, q in questions)
-    versions = ([nb["model"], nb["policy"]] if b else []) + ([v["rule_version"]] if v else [])
-    rules = ['<li><b>Status is never colour alone.</b> Every coloured mark carries an icon and a label.</li>',
-             '<li><b>Flags request review.</b> No field value, name or coordinate is corrected.</li>']
+            questions.append(("Vegetation", f'Did {backup} replace non-viable Plot {_plot_range(v["nonviable"])}, and why '
+                                            f'were primaries {_plot_range(v["never_registered"])} never registered?'))
+    q_html = "".join(f'<li><span><b>{a}</b> · {esc(q)}</span></li>' for a, q in questions)
+    rules = []
     if b:
-        rules += [f'<li><b>A fitted {nb["target"]:.0%} is not certified precision.</b> No species reaches '
-                  f'{nb["target"]:.0%} on a strict lower bound; that would need about {nb["checks_for_target"]} error-free checks.</li>',
-                  '<li><b>Recall is unavailable.</b> Calls BirdNET missed were never annotated.</li>' if not nb["recall_known"] else ""]
-    rules.append('<li><b>Every panel names its source file</b> in <code>outputs/</code>, so each number can be traced.</li>')
-    return f"""
-<div class="eyebrow">Results overview</div>
-<h1>What the data support, and what needs review</h1>
-<p class="sub">Two independent analyses. Each page answers one question in the same order: the answer, headline numbers,
-the decision, the evidence, then the records to review.</p>
+        rules.append(("info", f'Fitted {nb["target"]:.0%} ≠ certified precision',
+                      f'No species reaches {nb["target"]:.0%} on a strict lower confidence bound; about '
+                      f'{nb["checks_for_target"]} error-free expert checks would be needed.'))
+        if not nb["recall_known"]:
+            rules.append(("info", "Recall cannot be estimated here", "Bird calls missed by BirdNET were not separately annotated."))
+    rules += [("warning", "Flags request review, not automatic correction",
+               "Field values, names and GPS locations are preserved as supplied."),
+              ("good", "Every number has an output source",
+               "Each panel cites the file in outputs/ it was read from; status always pairs colour with an icon and label.")]
+    rules_html = "".join(f'<li>{ic(k)}<div><b>{esc(t)}</b><span>{esc(d)}</span></div></li>' for k, t, d in rules)
+    versions = ([nb["model"], nb["policy"]] if b else []) + ([v["rule_version"]] if v else [])
+    return f"""{head}
 <div class="two">
-  <section class="card ov"><div class="ovh"><span class="dot" style="background:var(--blue)"></span>Birds · BirdNET</div>{bird_card}</section>
-  <section class="card ov"><div class="ovh"><span class="dot" style="background:var(--good)"></span>Vegetation · herbaceous QA</div>{veg_card}</section>
+  <section class="card ov"><div class="ch"><div class="ovh">{diamond.format(c="var(--blue)")}Birds / BirdNET</div>{bird_pill}</div>{bird_body}</section>
+  <section class="card ov"><div class="ch"><div class="ovh">{diamond.format(c="var(--green)")}Vegetation / Herbaceous QA</div>{veg_pill}</div>{veg_body}</section>
 </div>
-<div class="two" style="margin-top:14px">
-  {card("Questions for Natural State", "Decisions the data cannot settle on their own", f'<ol class="qs">{q_html}</ol>')}
-  {card("How to read these pages", "Conventions used throughout",
-        f'<ul class="rules">{"".join(rules)}</ul><div class="src">Versions: '
+<div class="two" style="margin-top:16px">
+  {card("Questions for Natural State", "These issues cannot be resolved from the supplied data alone",
+        f'<ol class="qs">{q_html}</ol>', pill=pill(f"{len(questions)} open items", "grey"))}
+  {card("How to interpret the results", "Methods and limitations applied consistently",
+        f'<ul class="rules">{rules_html}</ul><div class="src">Versions: '
         + " · ".join(f"<code>{esc(x)}</code>" for x in versions) + '</div>'
-        + '<div class="actions"><a class="btn ghost" href="files.html">All output files →</a></div>')}
+        + '<div class="actions"><a class="btn ghost" href="files.html">All output files →</a></div>', pill=pill("Evidence first"))}
 </div>"""
 
 
 def birds_page(b: dict | None) -> str:
-    head = '<div class="eyebrow">Birds · BirdNET observations</div><h1>Which predictions become observations?</h1>'
     if not b:
-        return head + notice("01", "bird")
+        return hero("Birds / BirdNET / Decision evidence", "Which predictions become observations?", "") + notice("01", "bird")
     nb, sp = bird_numbers(b), b["species"]
-    released = nb["released"]
+    released, held = nb["released"], nb["held"]
     others = len(sp) - len(released)
+    head = hero("Birds / BirdNET / Decision evidence", "Which predictions become observations?",
+                f"Per species: fit expert correctness against logit(score); release predictions only when fitted "
+                f"P(correct) ≥ {nb['target']:g} and the evidence policy is met.",
+                f'<span class="hero-pill">{pill(f"Model · {nb['model']}")}</span>')
     answer = (f'Only {_and([s["name"] for s in released])} is released ({nb["n_obs"]:,} observations).' if len(released) == 1
               else f'{len(released)} species are released ({nb["n_obs"]:,} observations).')
-    answer += (f" The other {others} species stay <i>unconfirmed</i>, which means not confirmed, not absent." if others else "")
-    held = nb["held"]
+    answer += (f" The other {others} species remain <i>unconfirmed</i>, which does not mean absent." if others else "")
     kpis = "".join([
         kpi(f'{nb["n_pred"]:,}', "BirdNET predictions", f'{len(sp)} species · {nb["n_recorders"]} recorders'),
         kpi(f'{nb["n_checked"]:,}', "expert-checked clips", f'BirdNET {esc(nb["birdnet"])}' if nb["birdnet"] else ""),
-        kpi(f'{nb["n_obs"]:,}', "observations released", f'{nb["n_obs"] / nb["n_pred"]:.1%} of predictions'),
+        kpi(f'{nb["n_obs"]:,}', "observations released", f'{nb["n_obs"] / nb["n_pred"]:.1%} of predictions', green=True),
         kpi(f'{sum(s["cands"] for s in held):,}', f'{_and([s["short"] for s in held]) or "Held"} candidates held', "fitted, not released"),
         kpi(of(len(released), len(sp)), "species released", _and([s["short"] for s in released]) + " only" if released else ""),
     ])
-    cards = "".join(
-        f'<div class="sc"><div class="scn">{esc(s["name"])}</div>{chip(s["key"], s["label"], "–" if s["key"] == "info" else None)}'
-        f'<div class="scg"><div><b>{of(s["correct"], s["checked"])}</b><span>checks correct</span></div>'
-        f'<div><b>{_num(s["t"].conf_threshold)}</b><span>fitted cutoff</span></div>'
-        f'<div><b>{s["obs"]:,}</b><span>observations</span></div></div><div class="scw">{esc(s["reason"])}</div></div>'
-        for s in sp)
+    cards = []
+    for s in sp:
+        img = BIRD_IMAGES.get(s["name"])
+        pic = (f'<img class="bird" src="assets/{img}" alt="Illustration of {esc(s["name"])}" loading="lazy">' if img
+               else '<div class="bird-ph"></div>')
+        cards.append(
+            f'<article class="sc" style="--accent:{COLOUR[s["key"]]}"><div class="sc-top">{pic}<div>'
+            f'<div class="scn">{esc(s["name"])}</div>{chip(s["key"], s["label"], s["icon"])}</div></div>'
+            f'<div class="scw">{s["correct"]} / {s["checked"]} expert checks correct. {esc(s["reason"])}</div>'
+            f'<div class="scg"><div><b>{_num(s["t"].conf_threshold)}</b><span>fitted cutoff</span></div>'
+            f'<div><b>{s["obs"]:,}</b><span>observations</span></div></div></article>')
     calib = "".join(
         f'<div class="cm"><div class="cmh">{esc(s["name"])}</div>{calibration_svg(s, b["val"], nb["target"])}<div class="cap">'
         f'<span><span class="ln-solid" style="--c:{COLOUR[s["key"]]}"></span>GLM <b>{_num(s["t"].conf_threshold)}</b></span>'
         f'<span><span class="ln-dot"></span>Firth <b>{_num(s["firth"], none="none")}</b></span></div></div>' for s in sp)
+    short_label = {"good": "Released", "warning": "Held", "info": "No fit", "critical": "Out of range"}
     ev_rows = []
     for s in sp:
         name, e, m = s["name"], b["evidence"].loc[s["name"]], b["metrics"].loc[s["name"]]
@@ -420,50 +426,55 @@ def birds_page(b: dict | None) -> str:
             + td(_pct(b["binw"].at[name, "weighted_estimate_covered_bins"]), b["binw"].at[name, "weighted_estimate_covered_bins"])
             + td(_num(s["t"].conf_threshold), s["t"].conf_threshold) + td(_num(s["firth"], none="none"), s["firth"])
             + td(at, e.checked) + td(_pct(e.one_sided_95_lower), e.one_sided_95_lower)
-            + td(chip(s["key"], s["label"], "–" if s["key"] == "info" else None), s["label"], numeric=False) + "</tr>")
-    table = sortable_table([("Species", False), ("Checked precision (Wilson 95%)", True), ("Population-weighted", True),
+            + td(chip(s["key"], short_label[s["key"]], s["icon"]), s["label"], numeric=False) + "</tr>")
+    table = sortable_table([("Species", False), ("Checked precision", True), ("Weighted", True),
                             ("GLM cutoff", True), ("Firth cutoff", True), ("Checks at cutoff", True), ("Lower bound", True),
                             ("Decision", False)], ev_rows)
     best = b["evidence"].one_sided_95_lower.max()
-    bound_note = (f"None reaches {nb['target']:.0%}." if best < nb["target"] else "")
-    limits = (f'<div><b>{of(nb["unique_links"], nb["n_links"])}</b><span>validated clips link uniquely to a prediction; '
-              f'no expert overrides applied</span></div>'
-              f'<div><b>Recall</b><span>{"reported in bird_validation_metrics.csv" if nb["recall_known"] else "unavailable: missed calls were never annotated"}</span></div>'
-              f'<div><b>Sensitivity {nb["sensitivity"]:.1f}</b><span>assumed; confirm from BirdNET run settings</span></div>'
-              f'<div><b>Same-sample fit</b><span>no independent test set; revalidate before production</span></div>')
+    bound_note = f"None reaches {nb['target']:.0%}." if best < nb["target"] else ""
+    limits = [("warning", f'{nb["unique_links"]} / {nb["n_links"]} uniquely linked',
+               f'{"Most" if nb["unique_links"] < nb["n_links"] / 2 else "Some"} validation clips do not join uniquely to a '
+               f'prediction; no expert overrides were applied.'),
+              (("info", "–"), "Recall is " + ("reported" if nb["recall_known"] else "unavailable"),
+               "See bird_validation_metrics.csv." if nb["recall_known"] else "Missed calls were not annotated."),
+              ("warning", f'Sensitivity {nb["sensitivity"]:.1f} is assumed', "Confirm the original BirdNET run settings."),
+              ("info", "Same-sample model fit", "Thresholds were fitted on the checked clips; validate independently before production use.")]
+    lim_html = "".join(f'<li>{ic(*k) if isinstance(k, tuple) else ic(k)}<div><b>{esc(t)}</b><span>{esc(d)}</span></div></li>'
+                       for k, t, d in limits)
     return f"""{head}
-<p class="sub">Per species: logistic fit of expert outcome on logit(score); a prediction is an observation when fitted
-P(correct) ≥ {nb["target"]:g} and the species passes the support policy.</p>
-<div class="answer"><b>Answer.</b>{answer}</div>
+<div class="answer">{ic("info")}<div><b>Decision:</b>{answer}</div></div>
 <div class="kpis">{kpis}</div>
 <div class="stack">
-{card("Decision per species", "Why each species is released, held or unsupported", f'<div class="scs">{cards}</div>',
-      ("bird_thresholds.csv", "bird_label_summary.csv", "bird_validation_metrics.csv"))}
-{card("Calibration curves", f'Expert checks ({swatch("var(--blue)")}correct '
-      f'{swatch("var(--critical)")}wrong), fitted P(correct) (line), {nb["target"]:g} target '
-      f'(dashed), GLM cutoff (solid) and Firth cutoff (dotted). Hover a point for its score.', f'<div class="cms">{calib}</div>',
-      ("validation_results.csv (data/raw)", "bird_thresholds.csv", "bird_firth_sensitivity.csv"))}
-{card("Evidence behind each decision", "Checked-sample figures; thresholds were fitted on the same clips. Click a heading to sort.",
-      table + f'<div class="note">Lower bound = one-sided exact 95% bound on precision among checked clips at or above '
-              f'the cutoff. {bound_note}</div>',
-      ("bird_checked_cutoff_evidence.csv", "bird_bin_weighted_precision.csv", "bird_firth_sensitivity.csv"))}
-<div class="two">
-  {card("Predictions → candidates → observations", FUNNEL_KEY, funnel(sp)
-        + (f'<div class="note">{_and([s["short"] for s in held])} candidates are kept in <code>candidate_observation</code> '
-           f'for review; the final <code>observation</code> is <i>unconfirmed</i>.</div>' if held else ""),
-        ("bird_label_summary.csv",))}
-  {card("Limits to keep in view", "What these results cannot show", f'<div class="lims">{limits}</div>',
+{card("Decision by species", "Release depends on fit, score range, and strength of expert evidence",
+      f'<div class="scs">{"".join(cards)}</div><div class="note">Bird illustrations are for orientation only; they are not '
+      f'evidence of identification.</div>', ("bird_thresholds.csv", "bird_label_summary.csv", "bird_validation_metrics.csv"),
+      pill(f"{len(sp)} species reviewed", "grey"), "species")}
+{card("Calibration curves", f'Points are expert checks ({swatch("#3b82f6")}correct {swatch("var(--critical)")}wrong) · line = '
+      f'fitted P(correct) · dashed = {nb["target"]:g} target · coloured line = GLM cutoff · dotted = Firth cutoff. '
+      f'Curves are drawn from the fitted coefficients; hover a point for its score.', f'<div class="cms">{calib}</div>',
+      ("validation_results.csv (data/raw)", "bird_thresholds.csv", "bird_firth_sensitivity.csv"),
+      pill(f'Target: fitted {nb["target"]:g}'), "calibration")}
+<div class="grid ev" id="evidence">
+  {card("Evidence behind each decision", "Checked-sample metrics; thresholds fitted on these same clips. Click a heading to sort.",
+        table + f'<div class="note">Lower bound is a one-sided exact 95% confidence bound on checked precision at or above the '
+                f'cutoff, not evidence of certified {nb["target"]:.0%}. {bound_note}</div>',
+        ("bird_checked_cutoff_evidence.csv", "bird_bin_weighted_precision.csv", "bird_firth_sensitivity.csv"))}
+  {card("Limits to keep in view", "Results should not be overstated", f'<ul class="lims">{lim_html}</ul>',
         ("bird_validation_link_audit.csv", "bird_thresholds.csv"))}
 </div>
 </div>"""
 
 
-def vegetation_page(v: dict | None) -> str:
-    head = '<div class="eyebrow">Vegetation · herbaceous QA/QC</div><h1>Is the herbaceous survey fit for analysis?</h1>'
+def vegetation_page(v: dict | None, dates: str) -> str:
+    eyebrow = "Vegetation / Herbaceous QA / Spatial review"
     if not v:
-        return head + notice("02", "vegetation")
+        return hero(eyebrow, "Is the herbaceous survey fit for analysis?", "") + notice("02", "vegetation")
     qa = v["qa"]
     n_crit = v["counts"].get("critical", 0)
+    head = hero(eyebrow, "Is the herbaceous survey fit for analysis?",
+                f'{esc(v["project"])} · area {esc(v["area"])}{" · " + dates if dates else ""}. '
+                f"Flags request review; no field value is corrected.",
+                f'<span class="hero-pill">{pill(f"Rules · {v['rule_version']}")}</span>')
     complete = (f'Every analysed submission has its {qa["expected_quadrats"]} quadrats' if v["complete"]
                 else f'Not every analysed submission has {qa["expected_quadrats"]} quadrats')
     answer = (f'{"Yes, with review" if v["complete"] else "Partly"}. {complete} and {v["errors"]} record '
@@ -512,115 +523,70 @@ def vegetation_page(v: dict | None) -> str:
                   ("Flags E · W · I", True)], rows, "queue"))
     n_eff = len(v["effort"])
     complete_note = (f'All {v["n_analysed"]} analysed submissions completed {qa["expected_quadrats"]} quadrats. ' if v["complete"] else "")
+    flags_sub = f'{len(v["flags"]):,} flag rows · ' + " ".join(
+        f'{swatch(COLOUR[k])}{w}' for k, w in [("critical", "error"), ("warning", "warning"), ("info", "info")])
+    effort_sub = (f'{v["continuing"]} of {n_eff} plots still adding taxa at quadrat {qa["expected_quadrats"]} '
+                  f'({swatch("var(--blue)")}blue); {n_eff - v["continuing"]} levelling off ({swatch("var(--info)")}grey)')
     return f"""{head}
-<p class="sub">{esc(v["project"])} · area {esc(v["area"])}. Flags request review; no field value is corrected.</p>
-<div class="answer"><b>Answer.</b>{answer}</div>
+<div class="answer" id="survey">{ic("info")}<div><b>Answer:</b>{answer}</div></div>
 <div class="kpis">{kpis}</div>
 <div class="stack">
 <div class="grid">
-  {card("Where to look first", "Registered plots coloured by spatial review priority; planned locations without a survey shown separately. Hover a mark for detail.",
+  {card("Where to look first", "Registered plots coloured by spatial review priority; planned locations without a survey shown "
+        "separately. Hover a mark for detail.",
         f'<div class="mapwrap">{_veg_map(v)}</div>{map_legend(v["counts"], len(v["never_registered"]), len(v["nonviable"]))}'
-        '<div class="actions"><a class="btn primary" href="../transect_map.html">Open interactive transect map →</a></div>',
-        ("vegetation_transect_geometry.csv", "veg_plot_summary.csv", "vegetation_plot_coverage.csv", "centroids.csv (data/raw)"))}
+        '<div class="actions"><a class="btn outline" href="../transect_map.html">Open interactive transect map →</a></div>',
+        ("vegetation_transect_geometry.csv", "veg_plot_summary.csv", "vegetation_plot_coverage.csv", "centroids.csv (data/raw)"),
+        pill(f"{n_crit} critical", "grey"), "spatial")}
   {card("Project-level findings", "Patterns that affect many records, reported once", find_html + prio_box,
         ("vegetation_project_patterns.csv", "vegetation_plot_coverage.csv", "vegetation_qa_parameters.json"))}
 </div>
 <div class="two">
-  {card("QA flags by rule", f'{len(v["flags"]):,} flag rows · ' + " ".join(
-        f'{swatch(COLOUR[k])}{w}' for k, w in [("critical", "error"), ("warning", "warning"), ("info", "info")]),
-        rule_bars(v["flags"], v["rules"]), ("veg_qa_flags.csv", "vegetation_rule_catalogue.csv"))}
-  {card("Sampling effort", f'{v["continuing"]} of {n_eff} plots still adding taxa at quadrat {qa["expected_quadrats"]} '
-        f'({swatch("var(--blue)")}blue); {n_eff - v["continuing"]} levelling off '
-        f'({swatch("var(--info)")}grey)', effort_svg(v["effort"])
+  {card("QA flags by rule", flags_sub, rule_bars(v["flags"], v["rules"]), ("veg_qa_flags.csv", "vegetation_rule_catalogue.csv"),
+        anchor="flags")}
+  {card("Sampling effort", effort_sub, effort_svg(v["effort"])
         + f'<div class="note">{complete_note}Protocol completion is not proof of ecological adequacy.</div>',
-        ("veg_sampling_effort.csv",))}
+        ("veg_sampling_effort.csv",), anchor="effort")}
 </div>
 {card("Plot review queue", "Plots with a registered transect, highest priority first", queue,
-      ("veg_plot_summary.csv", "vegetation_transect_geometry.csv", "veg_sampling_effort.csv", "veg_qa_flags.csv"))}
+      ("veg_plot_summary.csv", "vegetation_transect_geometry.csv", "veg_sampling_effort.csv", "veg_qa_flags.csv"), anchor="queue")}
 </div>"""
 
 
-def _file_info(path: Path) -> tuple[str, dict | None]:
-    """'rows · cols · size' text and an embedded preview (None when the file opens on its own)."""
-    size = _size(path.stat().st_size)
-    if path.suffix == ".csv":
-        df = pd.read_csv(path, dtype=str, keep_default_na=False)
-        rows = df.head(PREVIEW_ROWS).map(lambda x: x[:PREVIEW_CELL_CHARS]).values.tolist()
-        note = (f"First {len(rows)} of {len(df):,} rows" if len(df) > len(rows)
-                else f"All {len(df)} rows" if len(df) else "Header only: this table has no rows")
-        header = ["" if c.startswith("Unnamed: ") else c for c in df.columns]
-        return f"{len(df):,} rows · {df.shape[1]} cols · {size}", {"kind": "table", "header": header, "rows": rows,
-                                                                    "total": len(df), "note": note}
-    if path.suffix in (".json", ".geojson"):
-        data = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(data, dict) and data.get("type") == "FeatureCollection":
-            feats = data.get("features", [])
-            text = f"{len(feats):,} features. First feature:\n\n" + (json.dumps(feats[0], indent=2) if feats else "(none)")
-            return f"{len(feats):,} features · {size}", {"kind": "text", "text": text, "note": "First feature only"}
-        text = json.dumps(data, indent=2)
-        cut = len(text) > PREVIEW_JSON_CHARS
-        meta = f"{len(data)} fields" if isinstance(data, dict) else f"{len(data):,} items"
-        return f"{meta} · {size}", {"kind": "text", "text": text[:PREVIEW_JSON_CHARS] + ("\n…" if cut else ""),
-                                    "note": f"First {PREVIEW_JSON_CHARS // 1000} KB" if cut else ""}
-    return size, None
-
-
-def files_page(out: Path) -> tuple[str, dict]:
-    groups: dict[str, list[str]] = {k: [] for k in FILE_GROUPS}
-    previews: dict[str, dict] = {}
-    order = {name: i for i, name in enumerate(FILE_DESCRIPTIONS)}
-    paths = sorted((p for p in out.rglob("*") if p.is_file() and "dashboard" not in p.relative_to(out).parts
-                    and not p.name.startswith(".") and p.relative_to(out).as_posix() != "index.html"),
-                   key=lambda p: (order.get(p.relative_to(out).as_posix(), len(order)), p.relative_to(out).as_posix()))
-    for p in paths:
-        rel = p.relative_to(out).as_posix()
-        href = "../" + quote(rel)
-        group, desc = FILE_DESCRIPTIONS.get(rel, ("figures" if rel.startswith("figures/") and p.suffix == ".png" else "other", ""))
-        search = esc(f"{rel} {desc}".lower())
-        if group == "figures":
-            title = desc or p.stem.split("_", 1)[-1].replace("_", " ").capitalize()
-            groups[group].append(
-                f'<figure class="fig" data-search="{search}"><a href="{href}" target="_blank" rel="noopener" '
-                f'title="Open full size"><img src="{href}" alt="{esc(title)}" loading="lazy"></a><figcaption class="fcap">'
-                f'<span class="fcode">{esc(p.stem.split("_", 1)[0])}</span>{esc(title)}'
-                f'<a class="btn ghost" href="{href}" download>Download</a></figcaption></figure>')
-            continue
-        meta, preview = _file_info(p)
-        kind = {".csv": "CSV", ".json": "JSON", ".geojson": "GEO", ".html": "HTML", ".png": "PNG"}.get(p.suffix, "FILE")
-        if preview:
-            previews[rel] = {**preview, "href": href}
-            view = f'<button type="button" class="btn ghost" data-preview="{esc(rel)}">Preview</button>'
-        else:
-            view = f'<a class="btn ghost" href="{href}" target="_blank" rel="noopener">Open</a>'
-        desc_html = (f'<div class="fdesc">{esc(desc)}</div>' if desc else '<div class="fdesc missing">No description yet</div>')
-        groups[group].append(
-            f'<li class="file" data-search="{search}"><span class="badge b-{kind.lower() if kind != "FILE" else "other"}">'
-            f'{kind}</span><div class="fmain"><a class="fname" href="{href}">{esc(rel)}</a>{desc_html}</div>'
-            f'<div class="fmeta">{esc(meta)}</div><div class="factions">{view}'
-            f'<a class="btn ghost" href="{href}" download>Download</a></div></li>')
-    sections = []
-    for key, (title, sub) in FILE_GROUPS.items():
-        if groups[key]:
-            body = (f'<div class="figs">{"".join(groups[key])}</div>' if key == "figures"
-                    else f'<ul class="files">{"".join(groups[key])}</ul>')
-            sections.append(f'<section class="card group"><div class="gh"><h2>{title}</h2><span>{sub}</span></div>{body}</section>')
-    data = json.dumps(previews, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    page = f"""<div class="head-row"><div><div class="eyebrow">Output files</div><h1>Every output, previewed and downloadable</h1>
-<p class="sub" style="margin:0">Everything in <code>outputs/</code>, regenerated by notebooks 01 and 02. Previews are embedded,
-so they work offline; downloads link to the real files.</p></div>
-<label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
- stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-<input id="file-filter" type="search" placeholder="Filter files…" aria-label="Filter files by name or description"></label></div>
-<div class="stack">{"".join(sections)}<p class="empty" id="no-match" hidden>No files match that filter.</p></div>
-<dialog id="preview" aria-labelledby="preview-title"><div class="dh"><h2 id="preview-title"></h2><small></small>
-<a class="btn ghost" download>Download</a><button type="button" class="btn ghost close">Close</button></div>
-<div class="db"></div></dialog>
-<script type="application/json" id="preview-data">{data}</script>"""
-    return page, previews
+def files_body(root: Path, target: Path) -> str:
+    head = hero("Project / Outputs &amp; provenance", "Files and reproducibility",
+                "A clear guide to the notebooks, source data, analysis tables, and figures used by the dashboard.")
+    return head + files_page(root, target)
 
 
 # ---------------------------------------------------------------------------- shell and build
-NAV = [("index.html", "Overview"), ("birds.html", "Birds"), ("vegetation.html", "Vegetation"), ("files.html", "Files")]
+TABS = [("index.html", "Overview"), ("birds.html", "Birds · BirdNET"), ("vegetation.html", "Vegetation · Herbaceous QA"),
+        ("files.html", "Files")]
+ICONS = {
+    "grid": '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    "diamond": '<path d="M12 3 21 12 12 21 3 12z"/>',
+    "curve": '<path d="M3 18c5 0 5-12 9-12s4 12 9 12"/>',
+    "check": '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
+    "survey": '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    "target": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+    "flag": '<path d="M5 21V4h11l-2 4 2 4H5"/>',
+    "bars": '<path d="M5 20V10M10 20V4M15 20v-7M20 20V8"/>',
+    "table": '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/>',
+    "file": '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+    "book": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>',
+    "refresh": '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+}
+# (group label, [(href, label, icon)]); the first link of each page is its "active" sidebar item.
+SIDEBAR = [
+    ("", [("index.html", "Overview", "grid")]),
+    ("Birds · BirdNET", [("birds.html", "Species decisions", "diamond"), ("birds.html#calibration", "Calibration curves", "curve"),
+                         ("birds.html#evidence", "Evidence &amp; validation", "check")]),
+    ("Vegetation · QA", [("vegetation.html", "Survey overview", "survey"), ("vegetation.html#spatial", "Spatial review", "target"),
+                         ("vegetation.html#flags", "QA flags", "flag"), ("vegetation.html#effort", "Sampling effort", "bars"),
+                         ("vegetation.html#queue", "Plot review queue", "table")]),
+    ("Project", [("files.html", "Files", "file"), ("files.html#methods", "Methods &amp; sources", "book"),
+                 ("files.html#reproducibility", "Reproducibility", "refresh")]),
+]
 THEME_BOOT = ("<script>try{var t=localStorage.getItem('ns-theme');"
               "if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>")
 SUN = ('<svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
@@ -630,66 +596,99 @@ MOON = ('<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
         'aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>')
 
 
-def page(title: str, active: str, body: str) -> str:
+def _sidebar(active: str, project: str, dates: str) -> str:
+    parts = ['<a class="logo" href="index.html"><img src="assets/natural-state-full-logo.png" '
+             'alt="Natural State: Restoring the Natural World"></a><nav class="side-nav" aria-label="Sections">']
+    for label, links in SIDEBAR:
+        if label:
+            parts.append(f'<div class="sg">{label}</div>')
+        for href, text, icon in links:
+            on = href == active
+            parts.append(f'<a class="sn{" on" if on else ""}" href="{href}"{" aria-current=page" if on else ""}>'
+                         f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+                         f'stroke-linejoin="round" aria-hidden="true">{ICONS[icon]}</svg>{text}</a>')
+    parts.append("</nav>")
+    lines = "".join(f"<span>{esc(x)}</span>" for x in (dates, "Two independent analyses", "Notebook-driven outputs") if x)
+    parts.append(f'<div class="side-card"><b>{esc(project)}</b>{lines}</div>')
+    return '<aside class="side">' + "".join(parts) + "</aside>"
+
+
+def page(title: str, active: str, body: str, project: str, dates: str) -> str:
     css = (ASSETS / "dashboard.css").read_text(encoding="utf-8")
     js = (ASSETS / "dashboard.js").read_text(encoding="utf-8")
     tabs = "".join(f'<a class="tab{" on" if href == active else ""}" href="{href}"'
-                   f'{" aria-current=page" if href == active else ""}>{label}</a>' for href, label in NAV)
+                   f'{" aria-current=page" if href == active else ""}>{label}</a>' for href, label in TABS)
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
+<link rel="icon" href="assets/natural-state-mark.png">
 {THEME_BOOT}
 <style>{css}</style>
 </head>
-<body>
-<nav class="nav" aria-label="Dashboard pages"><span class="brand">Natural State results</span><div class="tabs">{tabs}</div>
-<button type="button" id="theme-toggle" class="theme" aria-pressed="false" aria-label="Dark theme">{SUN}{MOON}<span class="tlabel">Light</span></button></nav>
+<body style="--hero-img:url('assets/scenery.png');--side-img:url('assets/savanna_sidebar.png')">
+<div class="app">
+{_sidebar(active, project, dates)}
+<div class="main">
+<header class="topbar"><a class="top-mark" href="index.html"><img src="assets/natural-state-mark.png" alt="Natural State"></a>
+<nav class="tabs" aria-label="Dashboard pages">{tabs}</nav>
+<span class="crumb">{esc(project)} / Take-home analysis</span>
+<button type="button" id="theme-toggle" class="theme" aria-pressed="false" aria-label="Dark theme">{SUN}{MOON}<span class="tlabel">Light</span></button></header>
 <main class="wrap">{body}</main>
+<footer class="foot">Natural State take-home · Generated from the notebook outputs by <code>src/dashboard.py</code></footer>
+</div>
+</div>
 <script>{js}</script>
 </body>
 </html>
 """
 
 
-# outputs/index.html: lets `python -m http.server --directory outputs` open the dashboard at "/".
-# file:// shows a folder listing for "dashboard/", so name the page explicitly there.
-REDIRECT = """<!doctype html>
+# Redirects so a static server opens the dashboard at "/": outputs/index.html (server rooted at outputs/)
+# and index.html in the project root (plain `python -m http.server 8000`). file:// needs the page named.
+def _redirect(rel: str) -> str:
+    return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Natural State results</title>
-<meta http-equiv="refresh" content="0; url=dashboard/index.html">
-<script>location.replace(location.protocol === 'file:' ? 'dashboard/index.html' : 'dashboard/');</script>
+<meta http-equiv="refresh" content="0; url={rel}index.html">
+<script>location.replace(location.protocol === 'file:' ? '{rel}index.html' : '{rel}');</script>
 </head>
-<body><p><a href="dashboard/index.html">Open the results dashboard</a></p></body>
+<body><p><a href="{rel}index.html">Open the results dashboard</a></p></body>
 </html>
 """
+
+
+REDIRECT = _redirect("dashboard/")
 
 
 def build_dashboard(project_root: Path) -> list[Path]:
     """Write the four dashboard pages into <project_root>/outputs/dashboard and return their paths.
 
-    Also writes outputs/index.html, a redirect to the dashboard, so serving outputs/ opens it at "/".
+    Also writes manifest.json and the outputs ZIP beside them, plus redirects at outputs/index.html
+    and <project_root>/index.html so either server root opens the dashboard at "/".
     """
     root = Path(project_root)
     out = root / "outputs"
     target = out / "dashboard"
     target.mkdir(parents=True, exist_ok=True)
     birds, veg = load_birds(root), load_vegetation(root)
-    files_body, _ = files_page(out)
-    pages = {"index.html": page("Results overview", "index.html", overview_page(birds, veg)),
-             "birds.html": page("Birds results", "birds.html", birds_page(birds)),
-             "vegetation.html": page("Vegetation QA results", "vegetation.html", vegetation_page(veg)),
-             "files.html": page("Output files", "files.html", files_body)}
+    dates = survey_dates(root)
+    project = veg["project"] if veg else "Natural State"
+    pages = {"index.html": ("Results overview", overview_page(birds, veg, dates)),
+             "birds.html": ("Birds results", birds_page(birds)),
+             "vegetation.html": ("Vegetation QA results", vegetation_page(veg, dates)),
+             "files.html": ("Files and reproducibility", files_body(root, target))}
     written = []
-    for name, content in pages.items():
+    for name, (title, body) in pages.items():
         path = target / name
-        path.write_text(content, encoding="utf-8")
+        path.write_text(page(title, name, body, project, dates), encoding="utf-8")
         written.append(path)
     (out / "index.html").write_text(REDIRECT, encoding="utf-8")
+    (root / "index.html").write_text(_redirect("outputs/dashboard/"), encoding="utf-8")
     return written
 
 

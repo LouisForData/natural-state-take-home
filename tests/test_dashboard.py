@@ -1,6 +1,7 @@
 """Checks for the static results dashboard (src/dashboard.py) built from a copy of outputs/."""
 import json
 import re
+import zipfile
 import shutil
 from pathlib import Path
 from urllib.parse import unquote
@@ -8,7 +9,8 @@ from urllib.parse import unquote
 import pandas as pd
 import pytest
 
-from src.dashboard import build_dashboard, load_vegetation
+from src.dashboard import BIRD_IMAGES, build_dashboard, load_birds, load_vegetation
+from src.dashboard_files import PREVIEW_ROWS, list_files
 from src.transect_map import transect_priorities
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,9 +60,10 @@ def test_pages_show_values_read_from_the_csvs(built):
 def test_pages_need_no_network(built):
     _, pages = built
     for name, text in pages.items():
-        urls = [u for u in re.findall(r"https?://[^\s\"'<>)]+", text) if u != "http://www.w3.org/2000/svg"]
+        urls = [u for u in re.findall(r"https?://[^\s\"'<>)]+", text) if u not in ("http://www.w3.org/2000/svg", "http://127.0.0.1:8000/")]  # the latter is instruction text
         assert urls == [], f"{name} references {urls[:3]}"
-        assert "<link" not in text and "src=\"http" not in text
+        assert "src=\"http" not in text
+        assert all(not h.startswith(("http:", "https:", "//")) for h in re.findall(r'<link[^>]+href="([^"]+)"', text))
     assert 'href="../transect_map.html"' in pages["vegetation.html"]
 
 
@@ -119,7 +122,48 @@ def test_previews_are_embedded_capped_and_accurate(built):
     csvs = {name: p for name, p in data.items() if name.endswith(".csv")}
     assert csvs
     for name, p in csvs.items():
-        assert len(p["rows"]) <= 15
-        assert p["total"] == len(pd.read_csv(out / name)), name
+        assert len(p["rows"]) <= PREVIEW_ROWS
+        assert p["total"] == len(pd.read_csv(root / name)), name
     assert len(text.encode("utf-8")) < 1.5 * 1024 * 1024
     assert all("fetch(" not in page for page in pages.values())
+
+
+def test_manifest_lists_only_existing_files(built):
+    root, _ = built
+    manifest = json.loads((root / "outputs" / "dashboard" / "manifest.json").read_text(encoding="utf-8"))
+    assert [e["path"] for e in manifest] == list_files(root)
+    assert all((root / e["path"]).is_file() and e["size_bytes"] == (root / e["path"]).stat().st_size for e in manifest)
+    assert all(e["category"] and e["href"] for e in manifest)
+
+
+def test_outputs_zip_matches_outputs(built):
+    root, pages = built
+    out = root / "outputs"
+    with zipfile.ZipFile(out / "dashboard" / "natural-state-outputs.zip") as zf:
+        names = set(zf.namelist())
+        expected = {"outputs/" + p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file()
+                    and "dashboard" not in p.relative_to(out).parts and p.relative_to(out).as_posix() != "index.html"}
+        assert names == expected
+        assert zf.read("outputs/bird_thresholds.csv") == (out / "bird_thresholds.csv").read_bytes()
+    assert 'href="natural-state-outputs.zip" download' in pages["files.html"]
+
+
+def test_species_cards_show_matching_illustrations_and_decisions(built):
+    root, pages = built
+    birds = load_birds(root)
+    statuses = {s["name"]: s["label"] for s in birds["species"]}
+    for species, image in BIRD_IMAGES.items():
+        assert f'src="assets/{image}" alt="Illustration of {species}"' in pages["birds.html"]
+        assert (ROOT / "outputs" / "dashboard" / "assets" / image).is_file()
+    assert statuses["Abyssinian Nightjar"] == "Released" and statuses["Three-banded Plover"] == "Held for review"
+    assert 'class="bird"' in pages["birds.html"]
+
+
+def test_files_page_leaves_out_git_ignored_inputs():
+    """Raw inputs and reference PDFs are git-ignored, so a published Files page must not list or embed them."""
+    from src.dashboard_files import publishable
+    if publishable(ROOT) is None:
+        pytest.skip("not a git work tree")
+    listed = list_files(ROOT)
+    assert not [r for r in listed if r.startswith(("data/raw/", "data/reference/"))]
+    assert all(r in publishable(ROOT) for r in listed)
