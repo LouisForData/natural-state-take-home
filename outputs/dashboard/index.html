@@ -16,14 +16,7 @@
   --side-w:252px;
   color-scheme: light;
 }
-/* Dark tokens: follow the OS until the viewer picks a theme (data-theme on <html>). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --page:#111316; --s1:#1a1d22; --s2:#22262c; --s3:#1f2a3a; --ln:#2e333b; --track:#2a2f37;
-    --t1:#eef2f8; --t2:#c0c8d4; --t3:#8e98a7; --blue:#7fa2f0; --blue-soft:#1f2a3d; --green:#57c06f; --muted-bar:#454b55;
-    --answer-bg:#18243a; --answer-ln:#2b4166; --answer-t:#9dbaf5; --shadow:none; color-scheme: dark;
-  }
-}
+/* Light is the default for every visitor; dark applies only when chosen with the toggle (data-theme on <html>). */
 :root[data-theme="dark"] {
   --page:#111316; --s1:#1a1d22; --s2:#22262c; --s3:#1f2a3a; --ln:#2e333b; --track:#2a2f37;
   --t1:#eef2f8; --t2:#c0c8d4; --t3:#8e98a7; --blue:#7fa2f0; --blue-soft:#1f2a3d; --green:#57c06f; --muted-bar:#454b55;
@@ -397,10 +390,9 @@ dialog::backdrop { background:rgba(15,25,45,.45); }
 (() => {
   const root = document.documentElement;
 
-  // ---- Theme toggle: OS setting until the viewer chooses; choice kept in localStorage.
+  // ---- Theme toggle: light by default; the viewer's choice is kept in localStorage.
   const toggle = document.getElementById('theme-toggle');
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const effective = () => root.dataset.theme || (mq.matches ? 'dark' : 'light');
+  const effective = () => root.dataset.theme || 'light';  // light by default, whatever the OS setting
   const paint = () => {
     const dark = effective() === 'dark';
     toggle.setAttribute('aria-pressed', String(dark));
@@ -413,7 +405,6 @@ dialog::backdrop { background:rgba(15,25,45,.45); }
     try { localStorage.setItem('ns-theme', next); } catch (e) { /* storage blocked: theme lasts for this page only */ }
     paint();
   });
-  if (mq.addEventListener) mq.addEventListener('change', paint);
   paint();
 
   // ---- Sidebar: highlight the link for the section in view (set on arrival, on hash change and while scrolling).

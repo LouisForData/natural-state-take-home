@@ -4,10 +4,9 @@
 (() => {
   const root = document.documentElement;
 
-  // ---- Theme toggle: OS setting until the viewer chooses; choice kept in localStorage.
+  // ---- Theme toggle: light by default; the viewer's choice is kept in localStorage.
   const toggle = document.getElementById('theme-toggle');
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const effective = () => root.dataset.theme || (mq.matches ? 'dark' : 'light');
+  const effective = () => root.dataset.theme || 'light';  // light by default, whatever the OS setting
   const paint = () => {
     const dark = effective() === 'dark';
     toggle.setAttribute('aria-pressed', String(dark));
@@ -20,7 +19,6 @@
     try { localStorage.setItem('ns-theme', next); } catch (e) { /* storage blocked: theme lasts for this page only */ }
     paint();
   });
-  if (mq.addEventListener) mq.addEventListener('change', paint);
   paint();
 
   // ---- Sidebar: highlight the link for the section in view (set on arrival, on hash change and while scrolling).

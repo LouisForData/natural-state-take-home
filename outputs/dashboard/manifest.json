@@ -770,10 +770,10 @@
       "methods"
     ],
     "type": "CSS",
-    "size_bytes": 26940,
+    "size_bytes": 26566,
     "description": "Dashboard styles",
     "href": "../../src/dashboard_assets/dashboard.css",
-    "meta": "364 lines \u00b7 26.3 KB"
+    "meta": "357 lines \u00b7 25.9 KB"
   },
   {
     "path": "src/dashboard_assets/dashboard.js",
@@ -783,10 +783,10 @@
       "methods"
     ],
     "type": "JS",
-    "size_bytes": 11434,
+    "size_bytes": 11093,
     "description": "Dashboard behaviour: sorting, filters, previews",
     "href": "../../src/dashboard_assets/dashboard.js",
-    "meta": "232 lines \u00b7 11.2 KB"
+    "meta": "230 lines \u00b7 10.8 KB"
   },
   {
     "path": "tests/test_analysis_policy.py",
