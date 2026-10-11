@@ -89,6 +89,8 @@ DESCRIPTIONS = {
     # vegetation outputs
     "outputs/veg_survey_summary.csv": "Survey-level counts: submissions, plots, quadrats, taxa and flags",
     "outputs/veg_plot_summary.csv": "Plot-level summaries, flag counts and spatial roll-up per submission",
+    "outputs/veg_plot_review_table.csv": "Plot-level summary used in the report: effort, richness, flags, geometry and review priority",
+    "outputs/veg_plot_review_table.md": "The same plot-level summary as a Markdown table",
     "outputs/veg_sampling_effort.csv": "Species accumulation per plot and an effort verdict",
     "outputs/veg_observations_long.csv": "Every species entry, one row per quadrat × species",
     "outputs/veg_qa_flags.csv": "Quality-assurance flags with rule, severity and record",

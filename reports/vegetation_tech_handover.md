@@ -44,6 +44,8 @@ Confirm form versions/calculation history; field rotation justifications; unusua
 
 ## Dashboard prototype
 
+A working prototype is live at <https://louisfordata.github.io/natural-state-take-home/outputs/dashboard/vegetation.html>, with the [interactive transect map](https://louisfordata.github.io/natural-state-take-home/outputs/transect_map.html). It shows the panels a production Vegetation QA/QC dashboard would need, built from the outputs described above.
+
 `src/dashboard.py` writes a static four-page dashboard to `outputs/dashboard/`, with images in `outputs/dashboard/assets/` (run by the last cell of notebook 02, or `python -m src.dashboard`). It reads exported files only and adds no analysis. Review priority comes from `transect_priorities()` in `src/transect_map.py`, so the dashboard and the interactive map cannot disagree. Run notebook 01 first; without bird outputs the bird panels show a notice instead.
 
 | Page and panel | Source |

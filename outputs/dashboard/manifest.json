@@ -22,10 +22,10 @@
       "vegetation"
     ],
     "type": "IPYNB",
-    "size_bytes": 2775587,
+    "size_bytes": 2799561,
     "description": "Survey completeness, spatial alignment, QA rules, sampling effort and this dashboard",
     "href": "../../notebooks/02_vegetation_quality_checks.ipynb",
-    "meta": "42 cells \u00b7 2.6 MB"
+    "meta": "42 cells \u00b7 2.7 MB"
   },
   {
     "path": "data/README.md",
@@ -234,6 +234,32 @@
     "description": "Plot-level summaries, flag counts and spatial roll-up per submission",
     "href": "../veg_plot_summary.csv",
     "meta": "32 rows \u00b7 17 cols \u00b7 5.4 KB"
+  },
+  {
+    "path": "outputs/veg_plot_review_table.csv",
+    "name": "veg_plot_review_table.csv",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "CSV",
+    "size_bytes": 1530,
+    "description": "Plot-level summary used in the report: effort, richness, flags, geometry and review priority",
+    "href": "../veg_plot_review_table.csv",
+    "meta": "30 rows \u00b7 13 cols \u00b7 1.5 KB"
+  },
+  {
+    "path": "outputs/veg_plot_review_table.md",
+    "name": "veg_plot_review_table.md",
+    "category": "veg",
+    "tags": [
+      "vegetation"
+    ],
+    "type": "MD",
+    "size_bytes": 7329,
+    "description": "The same plot-level summary as a Markdown table",
+    "href": "../veg_plot_review_table.md",
+    "meta": "33 lines \u00b7 7.2 KB"
   },
   {
     "path": "outputs/veg_sampling_effort.csv",
@@ -571,10 +597,10 @@
       "vegetation"
     ],
     "type": "MD",
-    "size_bytes": 5444,
+    "size_bytes": 13126,
     "description": "Vegetation findings for Natural State",
     "href": "../../reports/vegetation_quality_report.md",
-    "meta": "50 lines \u00b7 5.3 KB"
+    "meta": "77 lines \u00b7 12.8 KB"
   },
   {
     "path": "reports/vegetation_tech_handover.md",
@@ -585,10 +611,10 @@
       "vegetation"
     ],
     "type": "MD",
-    "size_bytes": 5947,
+    "size_bytes": 6304,
     "description": "Vegetation technical handover, including the dashboard",
     "href": "../../reports/vegetation_tech_handover.md",
-    "meta": "60 lines \u00b7 5.8 KB"
+    "meta": "62 lines \u00b7 6.2 KB"
   },
   {
     "path": "reports/decision_log.md",
@@ -624,10 +650,10 @@
       "methods"
     ],
     "type": "MD",
-    "size_bytes": 9557,
+    "size_bytes": 9985,
     "description": "Overview, setup and reading order",
     "href": "../../README.md",
-    "meta": "145 lines \u00b7 9.3 KB"
+    "meta": "147 lines \u00b7 9.8 KB"
   },
   {
     "path": "requirements.txt",
@@ -718,10 +744,10 @@
       "vegetation"
     ],
     "type": "PY",
-    "size_bytes": 38938,
+    "size_bytes": 40843,
     "description": "Interactive transect map and the shared review-priority rule",
     "href": "../../src/transect_map.py",
-    "meta": "647 lines \u00b7 38.0 KB"
+    "meta": "675 lines \u00b7 39.9 KB"
   },
   {
     "path": "src/dashboard.py",
@@ -757,10 +783,10 @@
       "methods"
     ],
     "type": "PY",
-    "size_bytes": 27883,
+    "size_bytes": 28113,
     "description": "Builds this Files page, the manifest and the outputs ZIP",
     "href": "../../src/dashboard_files.py",
-    "meta": "425 lines \u00b7 27.2 KB"
+    "meta": "427 lines \u00b7 27.5 KB"
   },
   {
     "path": "src/dashboard_assets/dashboard.css",

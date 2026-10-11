@@ -171,6 +171,34 @@ def transect_priorities(transects, plot_summary, flags, qa) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["plot_name", "priority", "reason"])
 
 
+def plot_review_table(plot_summary, transects, flags, effort, qa) -> pd.DataFrame:
+    """One row per non-rejected submission: effort, provisional richness, flags, geometry and review priority.
+
+    Uses the same priority rule as the map and dashboard. Values are reported as recorded; nothing is corrected.
+    """
+    acc = plot_summary[plot_summary["include_in_analysis"].astype(bool)]
+    prio = transect_priorities(transects, plot_summary, flags, qa)
+    t = (acc.merge(prio, on="plot_name", how="left")
+         .merge(transects[["plot_name", "length_m", "bearing_deg"]], on="plot_name", how="left")
+         .merge(effort[["plot_name", "expected_new_taxa_in_final_up_to_5_quadrats"]], on="plot_name", how="left"))
+    order = {k: i for i, k in enumerate(["critical", "serious", "warning", "good"])}
+    t = t.assign(_rank=t["priority"].map(order).fillna(len(order))).sort_values(["_rank", "flagged_quadrats", "plot_name"],
+                                                                              ascending=[True, False, True])
+    return pd.DataFrame({
+        "Plot": t["plot_name"].map(_short),
+        "Review priority": t["priority"].map(lambda p: STATUS[p]["label"] if p in STATUS else "No transect"),
+        "Quadrats": t["actual_quadrats"].astype(int),
+        "With herbs": t["actual_quadrats_with_herbs"].astype(int),
+        "Provisional richness": t["provisional_richness"].round(0).astype("Int64"),
+        "Errors": t["error"].astype(int), "Warnings": t["warning"].astype(int), "Info": t["info"].astype(int),
+        "Quadrats off the line": t["flagged_quadrats"].astype("Int64"),
+        "Median distance (m)": t["median_distance_m"].round(1),
+        "Length (m)": t["length_m"].round(0).astype("Int64"),
+        "Bearing (°)": t["bearing_deg"].round(0).astype("Int64"),
+        "New taxa, last 5 quadrats": t["expected_new_taxa_in_final_up_to_5_quadrats"].round(1),
+    })
+
+
 def _chip(status: str, text: str, label: str | None = None) -> str:
     s = STATUS[status]
     return (f'<div class="nc-chip"><span class="nc-ic" style="background:{s["color"]}">{s["icon"]}</span>'
