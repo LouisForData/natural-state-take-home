@@ -1,0 +1,40 @@
+{
+  "tested_on": "2026-10-10",
+  "python": "3.12.14",
+  "platform": "Linux",
+  "execution_method": "fresh IPython process for each notebook",
+  "code_cells_executed": {
+    "bird": 22,
+    "vegetation": 23
+  },
+  "regression_tests_passed": 13,
+  "packages": {
+    "pandas": "2.3.3",
+    "numpy": "2.5.3",
+    "matplotlib": "3.11.2",
+    "statsmodels": "0.15.0",
+    "scipy": "1.18.1",
+    "folium": "0.20.0",
+    "openpyxl": "3.1.5",
+    "tabulate": "0.10.0",
+    "nbformat": "5.11.1",
+    "IPython": "9.17.1",
+    "ipykernel": "7.4.0",
+    "pytest": "9.1.1"
+  },
+  "jupyterlab_ui_tested": false,
+  "test_framework": "pytest",
+  "test_function_count": 8,
+  "user_windows_notebook_run_verified": false,
+  "windows_pytest_run": {
+    "tested_on": "2026-10-11",
+    "python": "3.12.10",
+    "platform": "Windows",
+    "pytest": "9.1.1",
+    "command": "python -m pytest -v",
+    "tests_passed": 22,
+    "analysis_policy_cases": 13,
+    "dashboard_cases": 9,
+    "duration_seconds": 2.58
+  }
+}
